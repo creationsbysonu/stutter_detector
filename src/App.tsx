@@ -12,17 +12,13 @@ export default function App() {
 
   if (showSmartBoli) {
     return (
-      <div className="flex min-h-screen flex-col bg-[color:var(--bg)]">
-        <Header
-          language={language}
-          onLanguageChange={setLanguage}
-          onStartTest={() => setShowSmartBoli(false)}
-        />
+      <div className="flex min-h-screen flex-col bg-white">
+        <Header language={language} onLanguageChange={setLanguage} onStartTest={() => setShowSmartBoli(false)} />
         <SmartBoli />
         <button
           type="button"
           onClick={() => setShowSmartBoli(false)}
-          className="absolute top-6 left-6 z-50 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+          className="absolute top-6 left-6 z-50 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-bold text-black shadow-sm hover:bg-gray-50 transition-colors"
         >
           ← Back
         </button>
@@ -31,12 +27,8 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[color:var(--bg)]">
-      <Header
-        language={language}
-        onLanguageChange={setLanguage}
-        onStartTest={() => {}}
-      />
+    <div className="flex min-h-screen flex-col bg-white">
+      <Header language={language} onLanguageChange={setLanguage} onStartTest={() => {}} />
       <main className="flex-1">
         <Hero />
         <TestSection language={language} />
