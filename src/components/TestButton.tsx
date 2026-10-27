@@ -1,13 +1,19 @@
-import { FC } from "react";
-import { XMark } from "lucide-react";
+import type { ReactElement } from "react";
+import { Play } from "lucide-react";
 
-export default function TestButton(): JSX.Element {
+interface TestButtonProps {
+  onClick?: () => void;
+}
+
+export default function TestButton({ onClick }: TestButtonProps): ReactElement {
   return (
     <button
-      className="w-full btn btn-primary mt-8 hover:scale-[1.02] active:scale-95"
+      type="button"
+      onClick={onClick}
+      className="btn-primary mt-8 w-full hover:scale-[1.02] active:scale-95"
       aria-label="Run test"
     >
-      <XMark className="size-4 mr-2" /> Run Full Test
+      <Play className="mr-2 size-4" /> Run Full Test
     </button>
   );
 }
