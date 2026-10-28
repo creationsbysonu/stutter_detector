@@ -1,15 +1,12 @@
 import { useEffect } from "react";
 import { Activity, Mic } from "lucide-react";
-import { languages } from "../data/passages";
 import ThemeToggle from "./ThemeToggle";
 
 type HeaderProps = {
-  language: string;
-  onLanguageChange: (id: string) => void;
   onStartTest: () => void;
 };
 
-export default function Header({ language, onLanguageChange, onStartTest }: HeaderProps) {
+export default function Header({ onStartTest }: HeaderProps) {
   useEffect(() => {
     const els = document.querySelectorAll(".nav-item");
     els.forEach((el) => {
@@ -41,40 +38,7 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
           </span>
         </a>
 
-        <nav className="hidden md:flex items-center gap-3">
-          <div className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-[color:var(--surface)]/50 px-1 py-0.5 shadow-sm nav-item">
-            {languages.map((lang) => (
-              <button
-                key={lang.id}
-                type="button"
-                onClick={() => onLanguageChange(lang.id)}
-                aria-pressed={language === lang.id}
-                className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 ${
-                  language === lang.id
-                    ? "bg-[color:var(--ink)] text-[color:var(--surface)] shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                    : "text-[color:var(--ink-muted)]/60 hover:text-[color:var(--ink)] hover:bg-[color:var(--surface)]/80"
-                }`}
-              >
-                {lang.nativeLabel}
-              </button>
-            ))}
-          </div>
-          <ThemeToggle className="nav-item" />
-        </nav>
-
-        <div className="flex items-center gap-3 md:hidden">
-          <ThemeToggle className="nav-item" />
-          <button
-            type="button"
-            onClick={onStartTest}
-            className="flex items-center gap-2 rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2.5 text-sm font-semibold shadow-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all active:scale-[0.97] nav-item"
-            aria-label="Start fluency test"
-          >
-            <Mic className="size-3.5" /> Start test
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3 hidden md:flex">
+        <div className="flex items-center gap-3">
           <ThemeToggle className="nav-item" />
           <button
             type="button"

@@ -67,11 +67,7 @@ function AppInner() {
     )}>
       <div className="flex min-h-screen flex-col bg-[color:var(--surface)] theme-transition">
         <header>
-          <Header
-            language={language}
-            onLanguageChange={setLanguage}
-            onStartTest={() => setShowSmartBoli(true)}
-          />
+          <Header onStartTest={() => setShowSmartBoli(true)} />
         </header>
         <main className="flex-1">
           <Hero
