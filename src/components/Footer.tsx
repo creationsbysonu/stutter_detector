@@ -1,8 +1,12 @@
 import { Activity } from "lucide-react";
 
-export default function Footer() {
+type FooterProps = {
+  className?: string;
+};
+
+export default function Footer({ className }: FooterProps) {
   return (
-    <footer className="border-t border-white/5 bg-black/40 backdrop-blur-md">
+    <footer className={`border-t border-white/5 bg-black/40 backdrop-blur-md ${className ?? ""}`}>
       <div className="container-page py-10 sm:py-14">
         <div className="flex flex-col gap-6 md:flex-row md:items-center justify-between">
           <a href="#overview" className="flex items-center gap-2" aria-label="Smart Boli home">
