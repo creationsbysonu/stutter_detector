@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/all";
 import { Mic, Play } from "lucide-react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 type HeroProps = {
   onStartTest: () => void;
@@ -9,54 +12,132 @@ type HeroProps = {
 
 export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
   useEffect(() => {
-    gsap.from(".hero-reveal", {
+    const tl = gsap.timeline();
+
+    tl.from(".hero-badge", {
       y: 30,
       opacity: 0,
       duration: 0.7,
-      stagger: 0.12,
       ease: "power3.out",
+    })
+      .from(
+        ".hero-title",
+        {
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        },
+        "-=0.4"
+      )
+      .from(
+        ".hero-desc",
+        {
+          y: 30,
+          opacity: 0,
+          duration: 0.7,
+          ease: "power3.out",
+        },
+        "-=0.4"
+      )
+      .from(
+        ".hero-actions > *",
+        {
+          y: 30,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "power3.out",
+        },
+        "-=0.3"
+      )
+      .from(
+        ".hero-features > *",
+        {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      );
+
+    // Scroll-triggered wave animation
+    gsap.to(".wave-path", {
+      scrollTrigger: {
+        trigger: "#overview",
+        start: "top center",
+        end: "bottom center",
+        scrub: true,
+      },
+      attr: { d: "M0 80 Q 200 40 400 80 T 800 80" },
+      duration: 1,
+      ease: "none",
     });
   }, []);
 
   return (
-    <section id="overview" className="relative py-24 sm:py-32 lg:py-40 overflow-hidden">
+    <section id="overview" className="relative pt-24 sm:pt-32 lg:pt-40 pb-16 overflow-hidden">
+      {/* Premium SVG background graphics */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <svg className="absolute top-0 left-0 w-full h-[400px] text-white/5" preserveAspectRatio="none">
+          <path className="wave-path" d="M0 80 Q 200 120 400 80 T 800 80" fill="none" stroke="currentColor" strokeWidth="2" />
+        </svg>
+        <div
+          className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-cyan-500/10 blur-[120px]"
+        />
+        <div
+          className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-blue-500/10 blur-[120px]"
+        />
+      </div>
+
       <div className="container-page relative z-10">
         <div className="max-w-2xl">
-          <span className="hero-reveal inline-flex items-center gap-2 rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-gray-600">
+          <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-widest text-cyan-400">
             <Mic className="size-3" /> Speak naturally
           </span>
-          <h1 className="hero-reveal mt-6 text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-black sm:text-5xl lg:text-[3.6rem]">
-            Hear your <span className="relative inline-block text-black">fluency</span> in your own voice.
+          <h1 className="hero-title mt-6 text-balance text-5xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-[4.5rem]">
+            Hear your{" "}
+            <span className="relative inline-block text-cyan-400">
+              fluency
+              <span className="absolute inset-x-0 bottom-[8%] z-0 h-[10%] rounded-full bg-cyan-500/30 blur-md" />
+            </span>{" "}
+            in your own voice.
           </h1>
-          <p className="hero-reveal mt-6 max-w-lg text-lg leading-relaxed text-gray-600">
+          <p className="hero-desc mt-8 max-w-lg text-lg leading-relaxed text-white/70">
             Read a short passage aloud and get instant feedback on pace, pauses, and
             rhythm. Audio stays on your device — nothing is uploaded.
           </p>
-          <div className="hero-reveal mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="hero-actions mt-12 flex flex-col gap-4 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={onStartTest}
-              className="flex items-center justify-center gap-2 rounded-xl bg-black text-white px-6 py-3.5 text-sm font-semibold shadow-lg hover:bg-gray-900 transition-all active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 rounded-full bg-black text-white px-8 py-4 text-base font-bold shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:bg-gray-900 hover:shadow-[0_0_40px_rgba(14,165,230,0.4)] transition-all duration-300 active:scale-[0.97] group"
             >
-              <Play className="size-4" /> Begin fluency check
+              <Play className="size-5 group-hover:translate-x-1 transition-transform" /> Begin
+              fluency check
             </button>
             <button
               type="button"
               onClick={onLiveDetection}
-              className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-base font-bold text-white/90 hover:bg-white/10 hover:border-cyan-500/30 hover:text-white transition-all duration-300 active:scale-[0.97]"
             >
-              <Mic className="size-3" /> Live chunk detection
+              <Mic className="size-5" /> Live chunk detection
             </button>
           </div>
-          <div className="hero-reveal mt-10 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-black" /> No account needed
+          <div className="hero-features mt-14 flex flex-wrap items-center gap-6 text-sm text-white/50">
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(14,165,230,0.6)]" />
+              No account needed
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-black" /> On-device audio
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(14,165,230,0.6)]" />
+              On-device audio
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-black" /> Nepali · Hindi · English
+            <span className="inline-flex items-center gap-2">
+              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(14,165,230,0.6)]" />
+              Nepali · Hindi · English
             </span>
           </div>
         </div>
