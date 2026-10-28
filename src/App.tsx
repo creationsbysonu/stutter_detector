@@ -23,18 +23,18 @@ function AppInner() {
   if (showSmartBoli) {
     return (
       <ErrorBoundary fallback={(_error: Error, reset: () => void) => (
-        <div className="flex min-h-screen flex-col bg-black">
-          <header className="sticky top-0 z-50 border-b border-white/5 bg-black/80 backdrop-blur-md px-6 py-4">
-            <button onClick={() => setShowSmartBoli(false)} className="text-white/60 hover:text-white">
+        <div className="flex min-h-screen flex-col bg-[color:var(--surface)]">
+          <header className="sticky top-0 z-50 border-b border-[color:var(--line)] bg-[color:var(--surface)]/80 backdrop-blur-md px-6 py-4">
+            <button onClick={() => setShowSmartBoli(false)} className="text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]">
               ← Back
             </button>
           </header>
           <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
-            <h2 className="text-2xl font-bold text-white mb-2">Something went wrong</h2>
-            <p className="text-white/50 mb-6">{_error.message}</p>
+            <h2 className="text-2xl font-bold text-[color:var(--ink)] mb-2">Something went wrong</h2>
+            <p className="text-[color:var(--ink-muted)] mb-6">{_error.message}</p>
             <button
               onClick={reset}
-              className="rounded-full bg-white text-black px-5 py-2 text-sm font-bold hover:bg-gray-200 transition-colors"
+              className="rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2 text-sm font-bold hover:opacity-80 transition-colors"
             >
               Try again
             </button>
@@ -42,7 +42,7 @@ function AppInner() {
           <Footer />
         </div>
       )}>
-        <div className="flex min-h-screen flex-col bg-black theme-transition">
+        <div className="flex min-h-screen flex-col bg-[color:var(--surface)] theme-transition">
           <SmartBoli language={language} onBack={() => setShowSmartBoli(false)} />
         </div>
       </ErrorBoundary>
@@ -51,13 +51,13 @@ function AppInner() {
 
   return (
     <ErrorBoundary fallback={(_error, reset) => (
-      <div className="flex min-h-screen flex-col bg-black">
+      <div className="flex min-h-screen flex-col bg-[color:var(--surface)]">
         <main className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Something went wrong</h2>
-          <p className="text-white/50 mb-6">{_error.message}</p>
+          <h2 className="text-2xl font-bold text-[color:var(--ink)] mb-2">Something went wrong</h2>
+          <p className="text-[color:var(--ink-muted)] mb-6">{_error.message}</p>
           <button
             onClick={reset}
-            className="rounded-full bg-white text-black px-5 py-2 text-sm font-bold hover:bg-gray-200 transition-colors"
+            className="rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2 text-sm font-bold hover:opacity-80 transition-colors"
           >
             Try again
           </button>
@@ -65,14 +65,14 @@ function AppInner() {
         <Footer />
       </div>
     )}>
-      <div className="flex min-h-screen flex-col bg-black dark:bg-white theme-transition">
+      <div className="flex min-h-screen flex-col bg-[color:var(--surface)] theme-transition">
         <Sidebar
           language={language}
           onLanguageChange={setLanguage}
           onStartTest={() => setShowSmartBoli(true)}
           onLiveDetection={() => setShowSmartBoli(true)}
         />
-        <main className="flex-1 ml-80 dark:text-black">
+        <main className="flex-1 ml-80">
           <Hero
             onStartTest={() => {
               const el = document.getElementById("test");

@@ -4,17 +4,26 @@
 
 @layer base {
   :root {
+    --bg: #ffffff;
+    --surface: #f5f5f5;
+    --surface-2: #e5e5e5;
+    --ink: #0a0a0a;
+    --ink-muted: #52525b;
+    --line: #d4d4d8;
+    --brand: #0ea5e9;
+    --brand-soft: rgba(14, 165, 230, 0.15);
+    --fluent: #10b981;
+    --stutter: #ef4444;
+    --radius: 1rem;
+  }
+
+  html.dark {
     --bg: #0a0a0a;
     --surface: #111111;
     --surface-2: #1a1a1a;
     --ink: #ffffff;
     --ink-muted: #a1a1aa;
     --line: #27272a;
-    --brand: #0ea5e9;
-    --brand-soft: rgba(14, 165, 230, 0.15);
-    --fluent: #10b981;
-    --stutter: #ef4444;
-    --radius: 1rem;
   }
 
   * {
@@ -34,6 +43,7 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    transition: background-color 0.5s ease, color 0.5s ease;
   }
 
   #root {
@@ -88,11 +98,19 @@
   }
 
   .btn-primary {
-    @apply btn bg-black text-white shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:bg-gray-900 hover:shadow-[0_0_30px_rgba(14,165,230,0.3)] active:scale-[0.97];
+    @apply btn text-[color:var(--ink)] shadow-[0_0_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(14,165,230,0.3)] active:scale-[0.97];
+    background-color: var(--surface);
+  }
+  .btn-primary:hover {
+    background-color: var(--surface-2);
   }
 
   .btn-ghost {
-    @apply btn border border-[color:var(--line)] bg-white/5 text-[color:var(--ink)] hover:bg-white/10 hover:border-brand/50 active:scale-[0.97];
+    @apply btn border border-[color:var(--line)] text-[color:var(--ink)] hover:border-brand/50 active:scale-[0.97];
+    background-color: color-mix(in srgb, var(--surface) 50%, transparent);
+  }
+  .btn-ghost:hover {
+    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
   }
 
   .btn-soft {
@@ -100,7 +118,8 @@
   }
 
   .card {
-    @apply rounded-[2rem] border border-[color:var(--line)] bg-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md;
+    @apply rounded-[2rem] border border-[color:var(--line)] shadow-[0_8px_32px_rgba(0,0,0,0.3)] backdrop-blur-md;
+    background-color: color-mix(in srgb, var(--surface) 50%, transparent);
   }
 
   .card-hover {
@@ -108,7 +127,11 @@
   }
 
   .nav-link {
-    @apply rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--ink-muted)] transition-all duration-200 hover:bg-white/5 hover:text-white;
+    @apply rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--ink-muted)] transition-all duration-200 hover:text-[color:var(--ink)];
+    background-color: color-mix(in srgb, var(--surface) 50%, transparent);
+  }
+  .nav-link:hover {
+    background-color: color-mix(in srgb, var(--surface) 80%, transparent);
   }
 
   .field-label {
@@ -116,7 +139,8 @@
   }
 
   .glass-panel {
-    @apply rounded-[2rem] border border-[color:var(--line)] bg-white/5 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+    @apply rounded-[2rem] border border-[color:var(--line)] backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+    background-color: color-mix(in srgb, var(--surface) 50%, transparent);
   }
 }
 
