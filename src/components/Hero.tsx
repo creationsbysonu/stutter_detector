@@ -1,5 +1,6 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/all";
+import { useEffect } from "react";
 import { Mic, Play } from "lucide-react";
 import { LottieAnimation, LOTTIE_MIC } from "../lib/animations";
 
@@ -11,7 +12,70 @@ type HeroProps = {
 };
 
 export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
-  useEffectHero();
+  useEffect(() => {
+    const tl = gsap.timeline();
+
+    tl.from(".hero-badge", {
+      y: 30,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power3.out",
+    })
+      .from(
+        ".hero-title",
+        {
+          y: 40,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        },
+        "-=0.4"
+      )
+      .from(
+        ".hero-desc",
+        {
+          y: 30,
+          opacity: 0,
+          duration: 0.7,
+          ease: "power3.out",
+        },
+        "-=0.4"
+      )
+      .from(
+        ".hero-actions > *",
+        {
+          y: 30,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "power3.out",
+        },
+        "-=0.3"
+      )
+      .from(
+        ".hero-features > *",
+        {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      );
+
+    gsap.to(".wave-path", {
+      scrollTrigger: {
+        trigger: "#overview",
+        start: "top center",
+        end: "bottom center",
+        scrub: true,
+      },
+      attr: { d: "M0 80 Q 200 40 400 80 T 800 80" },
+      duration: 1,
+      ease: "none",
+    });
+  }, []);
 
   return (
     <section id="overview" className="relative pt-24 sm:pt-32 lg:pt-40 pb-16 overflow-hidden">
@@ -92,73 +156,4 @@ export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
       </div>
     </section>
   );
-}
-
-function useEffectHero() {
-  // Use a ref-based approach since this is a simple component
-  // Animations will be handled by CSS and GSAP on mount
-  if (typeof window !== "undefined") {
-    const tl = gsap.timeline();
-
-    tl.from(".hero-badge", {
-      y: 30,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    })
-      .from(
-        ".hero-title",
-        {
-          y: 40,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power3.out",
-        },
-        "-=0.4"
-      )
-      .from(
-        ".hero-desc",
-        {
-          y: 30,
-          opacity: 0,
-          duration: 0.7,
-          ease: "power3.out",
-        },
-        "-=0.4"
-      )
-      .from(
-        ".hero-actions > *",
-        {
-          y: 30,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: "power3.out",
-        },
-        "-=0.3"
-      )
-      .from(
-        ".hero-features > *",
-        {
-          y: 20,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
-        },
-        "-=0.4"
-      );
-
-    gsap.to(".wave-path", {
-      scrollTrigger: {
-        trigger: "#overview",
-        start: "top center",
-        end: "bottom center",
-        scrub: true,
-      },
-      attr: { d: "M0 80 Q 200 40 400 80 T 800 80" },
-      duration: 1,
-      ease: "none",
-    });
-  }
 }

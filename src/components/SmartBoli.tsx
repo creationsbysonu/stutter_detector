@@ -9,6 +9,7 @@ const API_BASE =
 const PREDICT_URL = `${API_BASE.replace(/\/$/, "")}/predict`;
 const WARMUP_URL = `${API_BASE.replace(/\/$/, "")}/warmup`;
 const CHUNK_SECONDS = 1.5;
+const BACKEND_CONFIGURED = Boolean(API_BASE);
 
 interface Prediction { label: string; fluent: boolean; confidence: number | null; }
 
@@ -20,6 +21,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const [fluent, setFluent] = useState<boolean | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [error, setError] = useState("");
+  const [backendReady, setBackendReady] = useState(BACKEND_CONFIGURED);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -28,6 +30,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const rafRef = useRef<number | null>(null);
   const levelRef = useRef(0);
   const screenRef = useRef<HTMLDivElement | null>(null);
+  const colorTweenRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
     gsap.from(".boli-item", {
@@ -37,6 +40,13 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
       stagger: 0.1,
       ease: "power3.out",
     });
+  }, []);
+
+  useEffect(() => {
+    if (!BACKEND_CONFIGURED) {
+      setBackendReady(false);
+      setError("Backend not configured. Set VITE_API_BASE_URL to your deployed API.");
+    }
   }, []);
 
   const release = () => {
@@ -52,6 +62,10 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     chunksRef.current = [];
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
+    if (colorTweenRef.current) {
+      colorTweenRef.current.kill();
+      colorTweenRef.current = null;
+    }
   };
 
   const startSegment = () => {
@@ -142,6 +156,10 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
 
   const start = async () => {
     setError("");
+    if (!backendReady) {
+      setError("Backend not configured. Please contact support.");
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
@@ -170,18 +188,20 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
 
   // Animate full-screen color on state change
   useEffect(() => {
-    if (screenRef.current && fluent !== null) {
-      const target = fluent ? "#10b981" : "#ef4444";
-      gsap.to(screenRef.current, {
-        backgroundColor: target,
-        duration: 0.3,
-        ease: "power2.inOut",
-      });
-    }
+    if (!backendReady || !screenRef.current || fluent === null) return;
+    const target = fluent ? "#10b981" : "#ef4444";
+    colorTweenRef.current = gsap.to(screenRef.current, {
+      backgroundColor: target,
+      duration: 0.3,
+      ease: "power2.inOut",
+    });
     return () => {
-      release();
+      if (colorTweenRef.current) {
+        colorTweenRef.current.kill();
+        colorTweenRef.current = null;
+      }
     };
-  }, [fluent]);
+  }, [fluent, backendReady]);
 
   const levelBar = `${Math.min(100, Math.round(levelRef.current * 500))}%`;
 

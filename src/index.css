@@ -17,6 +17,20 @@
     --radius: 1rem;
   }
 
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --surface: #f8fafc;
+    --surface-2: #f1f5f9;
+    --ink: #0f172a;
+    --ink-muted: #64748b;
+    --line: #e2e8f0;
+    --brand: #0ea5e9;
+    --brand-soft: rgba(14, 165, 230, 0.1);
+    --fluent: #10b981;
+    --stutter: #ef4444;
+    --radius: 1rem;
+  }
+
   * {
     box-sizing: border-box;
   }

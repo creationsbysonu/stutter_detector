@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { gsap } from "gsap";
+import { useState } from "react";
 import { BookOpen, Clock, Timer } from "lucide-react";
 import { passages, getDefaultPassage } from "../data/passages";
 import Recorder from "./Recorder";
@@ -11,16 +10,6 @@ export default function TestSection({ language }: TestSectionProps) {
   const langPassages = passages.filter((p) => p.language === language);
   const defaultPassage = getDefaultPassage(language);
   const selected = langPassages.find((p) => p.id === selectedId) ?? defaultPassage;
-
-  useEffect(() => {
-    gsap.from(".test-item", {
-      y: 40,
-      opacity: 0,
-      duration: 0.7,
-      stagger: 0.12,
-      ease: "power3.out",
-    });
-  }, [language]);
 
   return (
     <section id="test" className="section border-t border-white/5">
