@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import { gsap } from "gsap";
 import { Mic, Play } from "lucide-react";
 
-export default function Hero() {
+type HeroProps = {
+  onStartTest: () => void;
+  onLiveDetection: () => void;
+};
+
+export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
   useEffect(() => {
     gsap.from(".hero-reveal", {
       y: 30,
@@ -28,12 +33,20 @@ export default function Hero() {
             rhythm. Audio stays on your device — nothing is uploaded.
           </p>
           <div className="hero-reveal mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button className="flex items-center justify-center gap-2 rounded-xl bg-black text-white px-6 py-3.5 text-sm font-semibold shadow-lg hover:bg-gray-900 transition-all active:scale-[0.98]">
+            <button
+              type="button"
+              onClick={onStartTest}
+              className="flex items-center justify-center gap-2 rounded-xl bg-black text-white px-6 py-3.5 text-sm font-semibold shadow-lg hover:bg-gray-900 transition-all active:scale-[0.98]"
+            >
               <Play className="size-4" /> Begin fluency check
             </button>
-            <a href="#smart-boli" className="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]">
-              Live chunk detection
-            </a>
+            <button
+              type="button"
+              onClick={onLiveDetection}
+              className="flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all active:scale-[0.98]"
+            >
+              <Mic className="size-3" /> Live chunk detection
+            </button>
           </div>
           <div className="hero-reveal mt-10 flex flex-wrap items-center gap-4 text-sm text-gray-500">
             <span className="inline-flex items-center gap-1.5">

@@ -28,9 +28,15 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <Header language={language} onLanguageChange={setLanguage} onStartTest={() => {}} />
+      <Header language={language} onLanguageChange={setLanguage} onStartTest={() => setShowSmartBoli(true)} />
       <main className="flex-1">
-        <Hero />
+        <Hero
+          onStartTest={() => {
+            const el = document.getElementById("test");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }}
+          onLiveDetection={() => setShowSmartBoli(true)}
+        />
         <TestSection language={language} />
       </main>
       <Footer />
