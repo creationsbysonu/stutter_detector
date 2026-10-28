@@ -186,7 +186,6 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     setFluent(null);
   };
 
-  // Animate full-screen color on state change
   useEffect(() => {
     if (!backendReady || !screenRef.current || fluent === null) return;
     const target = fluent ? "#10b981" : "#ef4444";
@@ -210,24 +209,23 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
       ref={screenRef}
       className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-[color:var(--surface)] dark:bg-white transition-colors duration-300 theme-transition"
     >
-      {/* Header bar with back button */}
-      <header className="z-[70] w-full border-b border-[color:var(--line)] bg-[color:var(--surface)]/40 dark:bg-white/5 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
+      <header className="z-[70] w-full border-b border-[color:var(--line)] bg-[color:var(--surface)]/60 dark:bg-black/60 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 rounded-lg border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 px-3 py-2 text-xs font-bold text-[color:var(--ink)] dark:text-white hover:bg-[color:var(--surface)]/80 dark:hover:bg-white/10 transition-colors"
+          className="flex items-center gap-2 rounded-lg border border-[color:var(--line)] bg-white/5 dark:bg-black/5 px-3 py-2 text-xs font-bold text-[color:var(--ink)] dark:text-white hover:bg-[color:var(--surface-2)] dark:hover:bg-black/10 transition-colors"
         >
           <ArrowLeft className="size-4" /> Back
         </button>
         <div className="flex items-center gap-3">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-[color:var(--surface)]/50 dark:bg-black/10 text-[color:var(--ink)] dark:text-white">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-white/5 dark:bg-black/5 text-[color:var(--ink)] dark:text-white">
             <Mic className="size-4" />
           </span>
           <div>
             <span className="block text-[11px] font-bold uppercase tracking-wider text-cyan-400 dark:text-cyan-600">
               Smart Boli
             </span>
-            <span className="block text-[10px] text-[color:var(--ink-muted)]/50 dark:text-black/50">
+            <span className="block text-[10px] text-[color:var(--ink-muted)]/50 dark:text-white/50">
               Live chunk detection · {language.toUpperCase()}
             </span>
           </div>
@@ -235,24 +233,24 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
         <div className="w-16" />
       </header>
 
-      <aside className="w-full sm:w-80 border-r border-[color:var(--line)] bg-[color:var(--surface)]/80 dark:bg-white/5 backdrop-blur-md p-6 shrink-0">
+      <aside className="w-full sm:w-80 border-r border-[color:var(--line)] bg-[color:var(--surface)]/40 dark:bg-black/40 backdrop-blur-md p-6 shrink-0">
         <div className="mb-6 text-xs font-bold uppercase tracking-wider text-cyan-400 dark:text-cyan-600">
           Detection settings
         </div>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
             <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Chunk duration</span>
             <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">{CHUNK_SECONDS}s</span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
             <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Sample rate</span>
             <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">16 kHz</span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
             <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">MFCC features</span>
             <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">13</span>
           </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
             <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Model</span>
             <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">Random Forest</span>
           </div>
@@ -270,7 +268,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
         <div className="relative z-10 px-8">
           <div className={`inline-flex items-center justify-center rounded-full px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest mb-10 backdrop-blur-sm border ${
             fluent === null
-              ? "border-[color:var(--ink)]/20 dark:border-white/20 bg-[color:var(--surface)]/50 dark:bg-white/5 text-[color:var(--ink-muted)]/40 dark:text-white/40"
+              ? "border-[color:var(--ink)]/20 dark:border-white/20 bg-white/5 dark:bg-black/5 text-[color:var(--ink-muted)]/40 dark:text-white/40"
               : fluent
                 ? "border-green-500/50 bg-green-500/20 text-green-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
                 : "border-red-500/50 bg-red-500/20 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.4)]"
@@ -288,20 +286,19 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 text-xs font-bold text-[color:var(--ink-muted)]/40 dark:text-white/40 bg-[color:var(--surface)]/50 dark:bg-white/5 backdrop-blur px-4 py-2.5 rounded-full border border-[color:var(--line)] dark:border-white/10 shadow-lg">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 text-xs font-bold text-[color:var(--ink-muted)]/40 dark:text-white/40 bg-white/5 dark:bg-black/5 backdrop-blur px-4 py-2.5 rounded-full border border-[color:var(--line)] shadow-lg">
           <span
             className={`h-3 w-3 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(34,211,238,0.6)] dark:shadow-[0_0_12px_rgba(0,0,0,0.4)]" : "bg-[color:var(--ink-muted)]/20 dark:bg-white/20"}`}
           />
           {active ? "LIVE · 1.5 s chunks" : "STANDBY"}
         </div>
 
-        <div className="absolute bottom-6 left-6 right-6 h-1 overflow-hidden rounded-full bg-[color:var(--surface)]/50 dark:bg-white/10">
+        <div className="absolute bottom-6 left-6 right-6 h-1 overflow-hidden rounded-full bg-white/5 dark:bg-black/5">
           <div className="h-full rounded-full bg-[color:var(--ink)] dark:bg-white transition-[width] duration-100 shadow-[0_0_10px_rgba(255,255,255,0.5)] dark:shadow-[0_0_10px_rgba(0,0,0,0.5)]" style={{ width: levelBar }} />
         </div>
       </main>
 
-      {/* Control panel floating at bottom */}
-      <div className="z-[70] w-full sm:w-80 bg-[color:var(--ink)]/90 dark:bg-white/90 backdrop-blur-md border-t border-[color:var(--line)] p-6 shrink-0">
+      <div className="z-[70] w-full sm:w-80 bg-[color:var(--ink)]/5 dark:bg-white/90 backdrop-blur-md border-t border-[color:var(--line)] p-6 shrink-0">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1">
             <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/40 dark:text-white/40 mb-2">Control</p>
@@ -312,7 +309,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
               className={`w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-bold transition-all duration-300 ${
                 active
                   ? "bg-red-600 dark:bg-red-700 text-white shadow-lg shadow-red-500/40 hover:bg-red-700"
-                  : "bg-[color:var(--surface)] dark:bg-black text-[color:var(--ink)] dark:text-white shadow-lg shadow-white/20 dark:shadow-black/20 hover:bg-[color:var(--surface)]/80 dark:hover:bg-gray-100"
+                  : "bg-white dark:bg-black text-[color:var(--ink)] dark:text-white shadow-lg shadow-white/20 dark:shadow-black/20 hover:bg-gray-200 dark:hover:bg-gray-100"
               }`}
             >
               {active ? <StopCircle className="size-5" /> : <Play className="size-5" />}

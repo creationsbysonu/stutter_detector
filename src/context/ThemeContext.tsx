@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
 type Theme = "light" | "dark";
 
@@ -12,39 +12,36 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("smart-boli-theme") as Theme | null;
-      if (stored) return stored;
-      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-    return "light";
+    if (typeof window === "undefined") return "light";
+    const stored = localStorage.getItem("smart-boli-theme") as Theme | null;
+    if (stored) return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
 
-  const setThemeFn = useCallback((next: Theme) => {
-    setThemeState(next);
-    localStorage.setItem("smart-boli-theme", next);
-    if (next === "dark") {
+  // Apply dark class to document whenever theme changes (including initial mount)
+  useEffect(() => {
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
+  }, [theme]);
+
+  const setTheme = useCallback((next: Theme) => {
+    setThemeState(next);
+    localStorage.setItem("smart-boli-theme", next);
   }, []);
 
   const toggleTheme = useCallback((): void => {
     setThemeState((prev: Theme) => {
       const next: Theme = prev === "light" ? "dark" : "light";
       localStorage.setItem("smart-boli-theme", next);
-      if (next === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
       return next;
     });
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme: setThemeFn }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

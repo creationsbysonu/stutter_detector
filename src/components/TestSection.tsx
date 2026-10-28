@@ -17,7 +17,7 @@ export default function TestSection({ language, onLanguageChange }: TestSectionP
       <div className="container-page relative z-10">
         <div className="max-w-3xl">
           <div className="mb-10 flex flex-wrap items-center gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 px-3 py-1 text-xs font-bold uppercase tracking-widest text-[color:var(--ink-muted)]/50 dark:text-white/50">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--line)] bg-white/50 dark:bg-black/5 px-3 py-1 text-xs font-bold uppercase tracking-widest text-[color:var(--ink-muted)]/50 dark:text-white/50">
               Choose passage
             </span>
             <span className="text-xs font-medium text-[color:var(--ink-muted)]/40 dark:text-white/40">
@@ -48,8 +48,8 @@ export default function TestSection({ language, onLanguageChange }: TestSectionP
                     aria-pressed={active}
                     className={`rounded-full border px-5 py-2.5 text-left text-sm font-semibold transition-all duration-300 ${
                       active
-                        ? "border-cyan-500 bg-[color:var(--surface)]/30 text-[color:var(--ink)] shadow-[0_0_20px_rgba(34,211,238,0.2)]"
-                        : "border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 text-[color:var(--ink-muted)]/50 dark:text-white/50 hover:border-[color:var(--line)]/50 dark:hover:border-black/30 hover:bg-[color:var(--surface)]/80 dark:hover:bg-black/10 hover:text-[color:var(--ink)] dark:hover:text-white"
+                        ? "border-cyan-500 bg-white/30 text-[color:var(--ink)] dark:text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                        : "border-[color:var(--line)] bg-white/5 dark:bg-black/5 text-[color:var(--ink-muted)]/50 dark:text-white/50 hover:border-[color:var(--line)]/50 dark:hover:border-black/30 hover:bg-white/8 dark:hover:bg-black/10 hover:text-[color:var(--ink)] dark:hover:text-white"
                     }`}
                   >
                     {passage.title}
@@ -60,12 +60,12 @@ export default function TestSection({ language, onLanguageChange }: TestSectionP
           </div>
 
           {/* Settings */}
-          <div className="mb-14 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 p-6">
+          <div className="mb-14 rounded-xl border border-[color:var(--line)] bg-white/50 dark:bg-black/5 p-6">
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/40 dark:text-white/40">
               Settings
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              <div className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 px-1 py-0.5 shadow-sm">
+              <div className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-white/5 dark:bg-black/5 px-1 py-0.5 shadow-sm">
                 {languages.map((lang) => (
                   <button
                     key={lang.id}
@@ -75,7 +75,7 @@ export default function TestSection({ language, onLanguageChange }: TestSectionP
                     className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 ${
                       language === lang.id
                         ? "bg-[color:var(--ink)] text-[color:var(--surface)] shadow-[0_0_15px_rgba(34,211,238,0.4)]"
-                        : "text-[color:var(--ink-muted)]/60 hover:text-[color:var(--ink)] hover:bg-[color:var(--surface)]/80"
+                        : "text-[color:var(--ink-muted)]/60 hover:text-[color:var(--ink)] hover:bg-white/8 dark:hover:bg-black/10"
                     }`}
                   >
                     {lang.nativeLabel}

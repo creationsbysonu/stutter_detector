@@ -24,7 +24,7 @@ function AppInner() {
     return (
       <ErrorBoundary fallback={(_error: Error, reset: () => void) => (
         <div className="flex min-h-screen flex-col bg-[color:var(--surface)]">
-          <header className="sticky top-0 z-50 border-b border-[color:var(--line)] bg-[color:var(--surface)]/80 backdrop-blur-md px-6 py-4">
+          <header className="sticky top-0 z-50 border-b border-[color:var(--line)] bg-[color:var(--surface)]/60 backdrop-blur-md px-6 py-4">
             <button onClick={() => setShowSmartBoli(false)} className="text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]">
               ← Back
             </button>

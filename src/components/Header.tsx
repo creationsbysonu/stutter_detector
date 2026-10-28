@@ -1,4 +1,3 @@
-import { gsap } from "gsap";
 import { useEffect } from "react";
 import { Activity, Mic } from "lucide-react";
 import { languages } from "../data/passages";
@@ -12,20 +11,24 @@ type HeaderProps = {
 
 export default function Header({ language, onLanguageChange, onStartTest }: HeaderProps) {
   useEffect(() => {
-    gsap.from(".nav-item", {
-      y: -20,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.08,
-      ease: "power3.out",
+    const els = document.querySelectorAll(".nav-item");
+    els.forEach((el) => {
+      const animate = el as HTMLElement;
+      animate.style.opacity = "0";
+      animate.style.transform = "translateY(-10px)";
+      const r = animate.getBoundingClientRect();
+      void r;
+      animate.style.transition = "all 0.6s ease-out";
+      animate.style.opacity = "1";
+      animate.style.transform = "translateY(0)";
     });
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[color:var(--line)] bg-[color:var(--surface)]/40 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[color:var(--line)] bg-[color:var(--surface)]/60 backdrop-blur-md bg-white/60 dark:bg-black/60">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <a href="#overview" className="flex items-center gap-2 nav-item" aria-label="Smart Boli home">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/40">
             <Activity className="size-5 text-white" strokeWidth={2} />
           </span>
           <span className="flex flex-col leading-none">
@@ -38,7 +41,7 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
           </span>
         </a>
 
-        <div className="flex items-center gap-3">
+        <nav className="hidden md:flex items-center gap-3">
           <div className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-[color:var(--surface)]/50 px-1 py-0.5 shadow-sm nav-item">
             {languages.map((lang) => (
               <button
@@ -57,10 +60,26 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
             ))}
           </div>
           <ThemeToggle className="nav-item" />
+        </nav>
+
+        <div className="flex items-center gap-3 md:hidden">
+          <ThemeToggle className="nav-item" />
           <button
             type="button"
             onClick={onStartTest}
-            className="flex items-center gap-2 rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/40 hover:bg-gray-900 hover:shadow-[0_0_25px_rgba(34,211,238,0.4)] transition-all active:scale-[0.97] nav-item"
+            className="flex items-center gap-2 rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2.5 text-sm font-semibold shadow-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all active:scale-[0.97] nav-item"
+            aria-label="Start fluency test"
+          >
+            <Mic className="size-3.5" /> Start test
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 hidden md:flex">
+          <ThemeToggle className="nav-item" />
+          <button
+            type="button"
+            onClick={onStartTest}
+            className="flex items-center gap-2 rounded-full bg-[color:var(--ink)] text-[color:var(--surface)] px-5 py-2.5 text-sm font-semibold shadow-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all active:scale-[0.97] nav-item"
             aria-label="Start fluency test"
           >
             <Mic className="size-3.5" /> Start test
