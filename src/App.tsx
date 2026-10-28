@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
 import Hero from "./components/Hero";
 import TestSection from "./components/TestSection";
 import SmartBoli from "./components/SmartBoli";
@@ -66,13 +66,14 @@ function AppInner() {
       </div>
     )}>
       <div className="flex min-h-screen flex-col bg-[color:var(--surface)] theme-transition">
-        <Sidebar
-          language={language}
-          onLanguageChange={setLanguage}
-          onStartTest={() => setShowSmartBoli(true)}
-          onLiveDetection={() => setShowSmartBoli(true)}
-        />
-        <main className="flex-1 ml-80">
+        <header>
+          <Header
+            language={language}
+            onLanguageChange={setLanguage}
+            onStartTest={() => setShowSmartBoli(true)}
+          />
+        </header>
+        <main className="flex-1">
           <Hero
             onStartTest={() => {
               const el = document.getElementById("test");
@@ -80,9 +81,9 @@ function AppInner() {
             }}
             onLiveDetection={() => setShowSmartBoli(true)}
           />
-          <TestSection language={language} />
+          <TestSection language={language} onLanguageChange={setLanguage} />
         </main>
-        <Footer className="ml-80" />
+        <Footer />
       </div>
     </ErrorBoundary>
   );

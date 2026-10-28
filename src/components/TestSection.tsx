@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { BookOpen, Clock, Timer } from "lucide-react";
-import { passages, getDefaultPassage } from "../data/passages";
+import { languages, passages, getDefaultPassage } from "../data/passages";
 import Recorder from "./Recorder";
+import ThemeToggle from "./ThemeToggle";
 
-type TestSectionProps = { language: string };
+type TestSectionProps = { language: string; onLanguageChange: (id: string) => void };
 
-export default function TestSection({ language }: TestSectionProps) {
+export default function TestSection({ language, onLanguageChange }: TestSectionProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const langPassages = passages.filter((p) => p.language === language);
   const defaultPassage = getDefaultPassage(language);
@@ -33,7 +34,7 @@ export default function TestSection({ language }: TestSectionProps) {
           </p>
 
           <div className="mb-14">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-[color:var(--ink-muted)]/40 dark:text-white/40">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/40 dark:text-white/40">
               Passage
             </p>
             <div className="flex flex-wrap gap-2">
@@ -55,6 +56,33 @@ export default function TestSection({ language }: TestSectionProps) {
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Settings */}
+          <div className="mb-14 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 p-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/40 dark:text-white/40">
+              Settings
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="inline-flex items-center rounded-full border border-[color:var(--line)] bg-[color:var(--surface)]/50 dark:bg-black/5 px-1 py-0.5 shadow-sm">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.id}
+                    type="button"
+                    onClick={() => onLanguageChange(lang.id)}
+                    aria-pressed={language === lang.id}
+                    className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 ${
+                      language === lang.id
+                        ? "bg-[color:var(--ink)] text-[color:var(--surface)] shadow-[0_0_15px_rgba(34,211,238,0.4)]"
+                        : "text-[color:var(--ink-muted)]/60 hover:text-[color:var(--ink)] hover:bg-[color:var(--surface)]/80"
+                    }`}
+                  >
+                    {lang.nativeLabel}
+                  </button>
+                ))}
+              </div>
+              <ThemeToggle className="w-auto" />
             </div>
           </div>
 
