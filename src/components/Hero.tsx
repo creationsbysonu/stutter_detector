@@ -115,8 +115,7 @@ export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
               onClick={onStartTest}
               className="flex items-center justify-center gap-2 rounded-full bg-black text-white px-8 py-4 text-base font-bold shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:bg-gray-900 hover:shadow-[0_0_40px_rgba(14,165,230,0.4)] transition-all duration-300 active:scale-[0.97] group"
             >
-              <Play className="size-5 group-hover:translate-x-1 transition-transform" /> Begin
-              fluency check
+              <Play className="size-5 group-hover:translate-x-1 transition-transform" /> Start test
             </button>
             <button
               type="button"
