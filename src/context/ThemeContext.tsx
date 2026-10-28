@@ -23,7 +23,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setThemeFn = useCallback((next: Theme) => {
     setThemeState(next);
     localStorage.setItem("smart-boli-theme", next);
-    document.documentElement.setAttribute("data-theme", next);
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
   }, []);
 
   const toggleTheme = useCallback((): void => {

@@ -65,14 +65,14 @@ function AppInner() {
         <Footer />
       </div>
     )}>
-      <div className="flex min-h-screen flex-col bg-black theme-transition">
+      <div className="flex min-h-screen flex-col bg-black dark:bg-white theme-transition">
         <Sidebar
           language={language}
           onLanguageChange={setLanguage}
           onStartTest={() => setShowSmartBoli(true)}
           onLiveDetection={() => setShowSmartBoli(true)}
         />
-        <main className="flex-1 ml-80">
+        <main className="flex-1 ml-80 dark:text-black">
           <Hero
             onStartTest={() => {
               const el = document.getElementById("test");

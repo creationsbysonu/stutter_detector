@@ -88,7 +88,7 @@ function ScoreRing({ score, tone }: { score: number; tone: SpeechAnalysis["tone"
   return (
     <div className="relative size-32 shrink-0">
       <svg viewBox="0 0 110 110" className="size-full -rotate-90" aria-hidden="true">
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="white/10" strokeWidth="8" />
+        <circle cx="55" cy="55" r={radius} fill="none" stroke="white/10 dark:stroke-black/10" strokeWidth="8" />
         <circle
           cx="55"
           cy="55"
@@ -106,8 +106,8 @@ function ScoreRing({ score, tone }: { score: number; tone: SpeechAnalysis["tone"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-extrabold tracking-tight text-white">{score}</span>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">
+        <span className="text-3xl font-extrabold tracking-tight text-white dark:text-black">{score}</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-white/50 dark:text-black/50">
           / 100
         </span>
       </div>
@@ -131,7 +131,7 @@ function WaveTimeline({ analysis }: { analysis: SpeechAnalysis }) {
 
   return (
     <div>
-      <div className="flex h-16 items-center gap-[2px] rounded-xl bg-white/5 px-2.5 border border-white/10">
+      <div className="flex h-16 items-center gap-[2px] rounded-xl bg-white/5 dark:bg-black/5 px-2.5 border border-white/10 dark:border-black/10">
         {buckets.map((level, index) => {
           const height = Math.max(4, (level / maxLevel) * 100);
           const voiced = level > analysis.threshold;
@@ -139,7 +139,7 @@ function WaveTimeline({ analysis }: { analysis: SpeechAnalysis }) {
             <span
               key={index}
               className={`flex-1 rounded-full transition-all duration-100 ${
-                voiced ? "bg-cyan-500" : "bg-white/20"
+                voiced ? "bg-cyan-500 dark:bg-cyan-500" : "bg-white/20 dark:bg-black/20"
               }`}
               style={{
                 height: `${height}%`,
@@ -150,14 +150,14 @@ function WaveTimeline({ analysis }: { analysis: SpeechAnalysis }) {
           );
         })}
       </div>
-      <div className="mt-2 flex items-center justify-between text-[10px] font-medium text-white/50">
+      <div className="mt-2 flex items-center justify-between text-[10px] font-medium text-white/50 dark:text-black/50">
         <span>0s</span>
         <span className="inline-flex items-center gap-3">
           <span className="inline-flex items-center gap-1">
             <span className="size-2 rounded-full bg-cyan-500" /> voice
           </span>
           <span className="inline-flex items-center gap-1">
-            <span className="size-2 rounded-full bg-white/20" /> silence / pause
+            <span className="size-2 rounded-full bg-white/20 dark:bg-black/20" /> silence / pause
           </span>
         </span>
         <span>{analysis.duration.toFixed(1)}s</span>
@@ -168,10 +168,10 @@ function WaveTimeline({ analysis }: { analysis: SpeechAnalysis }) {
 
 function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+    <div className="rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5 p-4">
       <p className="field-label">{label}</p>
-      <p className="mt-1 text-xl font-extrabold tracking-tight text-white">{value}</p>
-      {hint && <p className="mt-0.5 text-[10px] leading-snug text-white/40">{hint}</p>}
+      <p className="mt-1 text-xl font-extrabold tracking-tight text-white dark:text-black">{value}</p>
+      {hint && <p className="mt-0.5 text-[10px] leading-snug text-white/40 dark:text-black/40">{hint}</p>}
     </div>
   );
 }
@@ -457,14 +457,14 @@ export default function Recorder({ passage }: { passage: Passage }) {
 
   return (
     <div className="card overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-4 sm:px-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 dark:border-black/10 px-6 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 dark:text-cyan-600">
             <Mic className="size-4" />
           </span>
           <div>
-            <p className="text-sm font-bold text-white">Your recording</p>
-            <p className="text-xs text-white/40">
+            <p className="text-sm font-bold text-white dark:text-black">Your recording</p>
+            <p className="text-xs text-white/40 dark:text-black/40">
               {phase === "results" ? "Session complete" : `${passage.title} · ${passage.words} words`}
             </p>
           </div>
@@ -477,7 +477,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
                 ? "bg-amber-600 text-white shadow-[0_0_20px_rgba(245,158,11,0.4)]"
                 : phase === "results"
                   ? "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]"
-                  : "bg-white/5 text-white/40 border border-white/10"
+                  : "bg-white/5 dark:bg-black/5 text-white/40 dark:text-black/40 border border-white/10 dark:border-black/10"
           }`}
         >
           <span
@@ -511,7 +511,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
 
         {phase === "results" && analysis ? (
           <div className="space-y-6">
-            <div className="flex flex-col items-center gap-6 rounded-xl border border-white/10 bg-white/5 p-6 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-center gap-6 rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5 p-6 sm:flex-row sm:items-center">
               <ScoreRing score={analysis.score} tone={analysis.tone} />
               <div className="text-center sm:text-left">
                 <span
@@ -521,7 +521,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
                 >
                   {analysis.label}
                 </span>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">{analysis.summary}</p>
+                <p className="mt-3 text-sm leading-relaxed text-white/70 dark:text-black/70">{analysis.summary}</p>
               </div>
             </div>
 
@@ -541,17 +541,17 @@ export default function Recorder({ passage }: { passage: Passage }) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 uppercase tracking-wider">
-                  <Volume2 className="size-4 text-cyan-400" /> Rhythm
+              <div className="flex items-center justify-between rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5 px-4 py-3">
+                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 dark:text-black/50 uppercase tracking-wider">
+                  <Volume2 className="size-4 text-cyan-400 dark:text-cyan-600" /> Rhythm
                 </span>
-                <span className="text-sm font-bold text-white">{rhythmLabel}</span>
+                <span className="text-sm font-bold text-white dark:text-black">{rhythmLabel}</span>
               </div>
-              <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 uppercase tracking-wider">
-                  <Timer className="size-4 text-cyan-400" /> Speaking
+              <div className="flex items-center justify-between rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5 px-4 py-3">
+                <span className="inline-flex items-center gap-2 text-[10px] font-bold text-white/50 dark:text-black/50 uppercase tracking-wider">
+                  <Timer className="size-4 text-cyan-400 dark:text-cyan-600" /> Speaking
                 </span>
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-white dark:text-black">
                   {Math.round(analysis.voicedRatio * 100)}%
                 </span>
               </div>
@@ -559,10 +559,10 @@ export default function Recorder({ passage }: { passage: Passage }) {
 
             <div>
               <div className="mb-3 flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-white/40">
+                <p className="text-xs font-bold uppercase tracking-wider text-white/40 dark:text-black/40">
                   Session timeline
                 </p>
-                <span className="text-[10px] text-white/30">browser energy analysis</span>
+                <span className="text-[10px] text-white/30 dark:text-black/30">browser energy analysis</span>
               </div>
               <WaveTimeline analysis={analysis} />
             </div>
@@ -573,7 +573,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
               </p>
               <ul className="mt-3 space-y-3">
                 {analysis.tips.map((tip) => (
-                  <li key={tip} className="flex items-start gap-3 text-sm leading-relaxed text-white/70">
+                  <li key={tip} className="flex items-start gap-3 text-sm leading-relaxed text-white/70 dark:text-black/70">
                     <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
                       <Check className="size-2.5" strokeWidth={3} />
                     </span>
@@ -585,7 +585,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
 
             {audioUrl && (
               <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-white/40">
+                <p className="mb-3 text-xs font-bold uppercase tracking-wider text-white/40 dark:text-black/40">
                   Replay your recording
                 </p>
                 <audio controls src={audioUrl} className="h-10 w-full rounded-lg" />
@@ -602,7 +602,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
               </button>
             </div>
 
-            <p className="text-[10px] leading-relaxed text-white/40">
+            <p className="text-[10px] leading-relaxed text-white/40 dark:text-black/40">
               This is a practice insight based on timing and energy, not a diagnosis.
               Stuttering is a complex speech condition; only a qualified speech-language
               professional can assess it.
@@ -610,7 +610,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
           </div>
         ) : (
           <>
-            <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5">
+            <div className="relative overflow-hidden rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5">
               <canvas
                 ref={canvasRef}
                 className="h-28 w-full"
@@ -619,19 +619,19 @@ export default function Recorder({ passage }: { passage: Passage }) {
               />
               {phase === "idle" && (
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-white/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-white/10 dark:bg-black/5 text-cyan-400 dark:text-cyan-600 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
                     <Mic className="size-5" />
                   </span>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-white dark:text-black">
                     Your waveform will appear here
                   </p>
-                  <p className="text-xs text-white/40">Microphone access is requested only when you start.</p>
+                  <p className="text-xs text-white/40 dark:text-black/40">Microphone access is requested only when you start.</p>
                 </div>
               )}
               {phase === "analyzing" && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90 backdrop-blur-sm">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90 dark:bg-white/90 backdrop-blur-sm">
                   <span className="size-6 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-white dark:text-black">
                     Analyzing pace, pauses, and rhythm…
                   </p>
                 </div>
@@ -643,15 +643,15 @@ export default function Recorder({ passage }: { passage: Passage }) {
                 <p className="field-label">
                   {phase === "recording" ? "Elapsed time" : "Ready when you are"}
                 </p>
-                <p className="text-[3rem] font-extrabold tabular-nums tracking-tight text-white">
+                <p className="text-[3rem] font-extrabold tabular-nums tracking-tight text-white dark:text-black">
                   {formatClock(elapsed)}
                 </p>
               </div>
               <div className="w-32">
-                <p className="mb-1.5 text-right text-[10px] font-bold uppercase tracking-wider text-white/40">
+                <p className="mb-1.5 text-right text-[10px] font-bold uppercase tracking-wider text-white/40 dark:text-black/40">
                   Input level
                 </p>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/10 dark:bg-black/10">
                   <div
                     className="h-full rounded-full bg-cyan-500 transition-[width] duration-100 shadow-[0_0_10px_rgba(34,211,238,0.6)]"
                     style={{ width: `${Math.min(100, Math.round(level * 450))}%` }}
@@ -668,7 +668,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
               )}
               {phase === "starting" && (
                 <button type="button" disabled className="btn-primary flex-1">
-                  <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  <span className="size-4 animate-spin rounded-full border-2 border-white/40 dark:border-black/40 border-t-white dark:border-t-black" />
                   Requesting microphone…
                 </button>
               )}
@@ -690,14 +690,14 @@ export default function Recorder({ passage }: { passage: Passage }) {
               )}
               {phase === "analyzing" && (
                 <button type="button" disabled className="btn-primary flex-1">
-                  <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  <span className="size-4 animate-spin rounded-full border-2 border-white/40 dark:border-black/40 border-t-white dark:border-t-black" />
                   Analyzing…
                 </button>
               )}
             </div>
 
-            <div className="mt-5 flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 p-4 text-[10px] leading-relaxed text-white/40">
-              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-cyan-400" />
+            <div className="mt-5 flex items-start gap-3 rounded-xl border border-white/10 dark:border-black/10 bg-white/5 dark:bg-black/5 p-4 text-[10px] leading-relaxed text-white/40 dark:text-black/40">
+              <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-cyan-400 dark:text-cyan-600" />
               <p>
                 Audio is processed locally in this browser and is not uploaded or stored.
                 Read at your own pace; there is no time limit.
