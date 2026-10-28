@@ -39,7 +39,7 @@ export default function App() {
             onLanguageChange={setLanguage}
             onStartTest={() => setShowSmartBoli(false)}
           />
-          <SmartBoli language={language} />
+          <SmartBoli language={language} onBack={() => setShowSmartBoli(false)} />
           <button
             type="button"
             onClick={() => setShowSmartBoli(false)}

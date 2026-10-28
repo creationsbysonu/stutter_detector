@@ -1,20 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Mic, StopCircle, Play } from "lucide-react";
+import { Mic, StopCircle, Play, ArrowLeft } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 const API_BASE =
   ((import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL ??
-    "/api") as string;
+    "") as string;
 const PREDICT_URL = `${API_BASE.replace(/\/$/, "")}/predict`;
 const WARMUP_URL = `${API_BASE.replace(/\/$/, "")}/warmup`;
 const CHUNK_SECONDS = 1.5;
 
 interface Prediction { label: string; fluent: boolean; confidence: number | null; }
 
-type SmartBoliProps = { language: string };
+type SmartBoliProps = { language: string; onBack: () => void };
 
-export default function SmartBoli({ language }: SmartBoliProps) {
+export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const [active, setActive] = useState(false);
   const [label, setLabel] = useState("READY");
   const [fluent, setFluent] = useState<boolean | null>(null);
@@ -28,16 +28,6 @@ export default function SmartBoli({ language }: SmartBoliProps) {
   const rafRef = useRef<number | null>(null);
   const levelRef = useRef(0);
   const screenRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    gsap.from(".boli-item", {
-      y: 30,
-      opacity: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: "power3.out",
-    });
-  }, []);
 
   const release = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -79,7 +69,7 @@ export default function SmartBoli({ language }: SmartBoliProps) {
       chunksRef.current = [];
       await sendBlob(blob);
       if (active) {
-        timerRef.current = setTimeout(() => startSegment(), 50);
+        timerRef.current = setTimeout(() => startSegment(), 100);
       }
     };
 
@@ -168,13 +158,14 @@ export default function SmartBoli({ language }: SmartBoliProps) {
     setFluent(null);
   };
 
+  // Animate full-screen color on state change
   useEffect(() => {
     if (screenRef.current && fluent !== null) {
       const target = fluent ? "#10b981" : "#ef4444";
-      gsap.to(screenRef.current, { backgroundColor: target, duration: 0.5, ease: "power2.inOut" });
-      gsap.to(screenRef.current.querySelectorAll(".boli-text"), {
-        color: "#ffffff",
-        duration: 0.5,
+      gsap.to(screenRef.current, {
+        backgroundColor: target,
+        duration: 0.3,
+        ease: "power2.inOut",
       });
     }
     return () => {
@@ -185,78 +176,127 @@ export default function SmartBoli({ language }: SmartBoliProps) {
   const levelBar = `${Math.min(100, Math.round(levelRef.current * 500))}%`;
 
   return (
-    <div ref={screenRef} className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-black transition-colors duration-700">
-      <aside className="w-full sm:w-80 border-r border-white/5 bg-black/80 backdrop-blur-md p-8 flex flex-col gap-5">
-        <div className="flex items-center gap-3 boli-item">
-          <Mic className="size-5 text-white" />
-          <span className="font-bold text-white text-lg tracking-tight">Smart Boli</span>
-          <span className="ml-auto text-[11px] font-bold uppercase tracking-wider text-cyan-400">
-            Live chunk detection
+    <div
+      ref={screenRef}
+      className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-black transition-colors duration-300"
+    >
+      {/* Header bar with back button */}
+      <header className="z-[70] w-full border-b border-white/10 bg-black/40 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 transition-colors"
+        >
+          <ArrowLeft className="size-4" /> Back
+        </button>
+        <div className="flex items-center gap-3">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-white/10 text-white">
+            <Mic className="size-4" />
           </span>
-        </div>
-        <div className="mt-2 text-xs text-white/40 boli-item">
-          1.5 s chunks &bull; 16 kHz &bull; 13 MFCC features &bull; Random Forest
-        </div>
-
-        <div className="flex items-center justify-between gap-2 boli-item">
-          <button
-            type="button"
-            onClick={active ? stop : start}
-            disabled={error.length > 0 && !active}
-            className={`flex-1 items-center justify-center gap-2 rounded-full px-5 py-3.5 text-sm font-bold transition-all duration-300 ${
-              active
-                ? "bg-red-600 text-white shadow-lg shadow-red-500/30 hover:bg-red-700"
-                : "bg-white text-black shadow-lg shadow-white/20 hover:bg-gray-200"
-            }`}
-          >
-            {active ? <StopCircle className="size-5" /> : <Play className="size-5" />}
-            {active ? "Stop detection" : "Start detection"}
-          </button>
-        </div>
-
-        {error && (
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400 boli-item">
-            {error}
+          <div>
+            <span className="block text-[11px] font-bold uppercase tracking-wider text-cyan-400">
+              Smart Boli
+            </span>
+            <span className="block text-[10px] text-white/50">
+              Live chunk detection · {language.toUpperCase()}
+            </span>
           </div>
-        )}
+        </div>
+        <div className="w-16" />
+      </header>
+
+      <aside className="w-full sm:w-80 border-r border-white/10 bg-black/80 backdrop-blur-md p-6 shrink-0">
+        <div className="mb-6 text-xs font-bold uppercase tracking-wider text-cyan-400">
+          Detection settings
+        </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5">
+            <span className="text-xs text-white/60">Chunk duration</span>
+            <span className="text-xs font-mono text-white">{CHUNK_SECONDS}s</span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5">
+            <span className="text-xs text-white/60">Sample rate</span>
+            <span className="text-xs font-mono text-white">16 kHz</span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5">
+            <span className="text-xs text-white/60">MFCC features</span>
+            <span className="text-xs font-mono text-white">13</span>
+          </div>
+          <div className="flex items-center justify-between p-3 rounded-xl border border-white/10 bg-white/5">
+            <span className="text-xs text-white/60">Model</span>
+            <span className="text-xs font-mono text-white">Random Forest</span>
+          </div>
+        </div>
 
         <div className="mt-auto border-t border-white/10 pt-6">
           <p className="text-xs font-bold uppercase tracking-wider text-white/30 mb-3">Session log</p>
-          <div className="text-xs text-white/40 italic boli-item">Detection appears on screen</div>
+          <div className="text-xs text-white/40 italic">
+            Detection appears on screen
+          </div>
         </div>
       </aside>
 
       <main className="flex-1 relative overflow-hidden flex items-center justify-center text-center">
         <div className="relative z-10 px-8">
-          <div className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-[11px] font-bold uppercase tracking-widest mb-8 backdrop-blur-sm border ${
+          <div className={`inline-flex items-center justify-center rounded-full px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest mb-10 backdrop-blur-sm border ${
             fluent === null
               ? "border-white/20 bg-white/5 text-white/40"
               : fluent
-                ? "border-green-500/50 bg-green-500/20 text-green-400 shadow-[0_0_25px_rgba(16,185,129,0.4)]"
-                : "border-red-500/50 bg-red-500/20 text-red-400 shadow-[0_0_25px_rgba(239,68,68,0.4)]"
+                ? "border-green-500/50 bg-green-500/20 text-green-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+                : "border-red-500/50 bg-red-500/20 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.4)]"
           }`}>
             {fluent === null ? "IDLE" : fluent ? "FLUENT" : "STUTTERED"}
           </div>
-          <div className="text-[8xl] font-black tracking-tighter text-white sm:text-[10rem]">{label}</div>
+          <div className="text-[9xl] font-black tracking-tighter text-white sm:text-[11rem]">{label}</div>
           {confidence != null && (
-            <p className="mt-4 text-lg text-white/60 font-medium">
+            <p className="mt-5 text-xl text-white/60 font-medium">
               Confidence: {(confidence * 100).toFixed(1)}%
             </p>
           )}
-          <p className="mt-3 text-sm text-white/40">
+          <p className="mt-4 text-sm text-white/40">
             {active ? "Listening — speak now…" : "Press start to begin live detection"}
           </p>
         </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 text-xs font-bold text-white/40 bg-white/5 backdrop-blur px-4 py-2 rounded-full border border-white/10">
-          <span className={`h-2.5 w-2.5 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(14,165,230,0.6)]" : "bg-white/20"}`} />
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 text-xs font-bold text-white/40 bg-white/5 backdrop-blur px-4 py-2.5 rounded-full border border-white/10 shadow-lg">
+          <span
+            className={`h-3 w-3 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(14,165,230,0.6)]" : "bg-white/20"}`}
+          />
           {active ? "LIVE · 1.5 s chunks" : "STANDBY"}
         </div>
 
         <div className="absolute bottom-6 left-6 right-6 h-1 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-white transition-[width] duration-100" style={{ width: levelBar }} />
+          <div className="h-full rounded-full bg-white transition-[width] duration-100 shadow-[0_0_10px_rgba(255,255,255,0.5)]" style={{ width: levelBar }} />
         </div>
       </main>
+
+      {/* Control panel floating at bottom */}
+      <div className="z-[70] w-full sm:w-80 bg-black/90 backdrop-blur-md border-t border-white/10 p-6 shrink-0">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-white/40 mb-2">Control</p>
+            <button
+              type="button"
+              onClick={active ? stop : start}
+              disabled={error.length > 0 && !active}
+              className={`w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-bold transition-all duration-300 ${
+                active
+                  ? "bg-red-600 text-white shadow-lg shadow-red-500/40 hover:bg-red-700"
+                  : "bg-white text-black shadow-lg shadow-white/20 hover:bg-gray-200"
+              }`}
+            >
+              {active ? <StopCircle className="size-5" /> : <Play className="size-5" />}
+              {active ? "Stop detection" : "Start detection"}
+            </button>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
+            {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
