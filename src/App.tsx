@@ -5,9 +5,18 @@ import TestSection from "./components/TestSection";
 import SmartBoli from "./components/SmartBoli";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ThemeProvider } from "./context/ThemeContext";
 import { defaultLanguage } from "./data/passages";
 
 export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
+  );
+}
+
+function AppInner() {
   const [language, setLanguage] = useState<string>(defaultLanguage);
   const [showSmartBoli, setShowSmartBoli] = useState(false);
 
@@ -33,7 +42,7 @@ export default function App() {
           <Footer />
         </div>
       )}>
-        <div className="flex min-h-screen flex-col bg-black">
+        <div className="flex min-h-screen flex-col bg-black theme-transition">
           <SmartBoli language={language} onBack={() => setShowSmartBoli(false)} />
         </div>
       </ErrorBoundary>
@@ -56,7 +65,7 @@ export default function App() {
         <Footer />
       </div>
     )}>
-      <div className="flex min-h-screen flex-col bg-black">
+      <div className="flex min-h-screen flex-col bg-black theme-transition">
         <Header
           language={language}
           onLanguageChange={setLanguage}

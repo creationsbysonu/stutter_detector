@@ -1,7 +1,8 @@
-import { useEffect } from "react";
 import { gsap } from "gsap";
+import { useEffect } from "react";
 import { Activity, Mic } from "lucide-react";
 import { languages } from "../data/passages";
+import ThemeToggle from "./ThemeToggle";
 
 type HeaderProps = {
   language: string;
@@ -21,10 +22,10 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-black/60 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/5 bg-black/40 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <a href="#overview" className="flex items-center gap-2 nav-item" aria-label="Smart Boli home">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-brand-gradient text-white shadow-lg shadow-cyan-500/20">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
             <Activity className="size-5 text-white" strokeWidth={2} />
           </span>
           <span className="flex flex-col leading-none">
@@ -47,7 +48,7 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
                 aria-pressed={language === lang.id}
                 className={`rounded-full px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 ${
                   language === lang.id
-                    ? "bg-black text-white shadow-[0_0_15px_rgba(14,165,230,0.4)]"
+                    ? "bg-white/20 text-white shadow-[0_0_15px_rgba(34,211,238,0.4)]"
                     : "text-white/60 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -55,10 +56,11 @@ export default function Header({ language, onLanguageChange, onStartTest }: Head
               </button>
             ))}
           </div>
+          <ThemeToggle className="nav-item" />
           <button
             type="button"
             onClick={onStartTest}
-            className="flex items-center gap-2 rounded-full bg-black text-white px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/40 hover:bg-gray-900 hover:shadow-[0_0_25px_rgba(14,165,230,0.4)] transition-all active:scale-[0.97] nav-item"
+            className="flex items-center gap-2 rounded-full bg-black text-white px-5 py-2.5 text-sm font-semibold shadow-lg shadow-black/40 hover:bg-gray-900 hover:shadow-[0_0_25px_rgba(34,211,238,0.4)] transition-all active:scale-[0.97] nav-item"
             aria-label="Start fluency test"
           >
             <Mic className="size-3.5" /> Start test

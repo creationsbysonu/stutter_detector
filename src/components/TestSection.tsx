@@ -58,7 +58,7 @@ export default function TestSection({ language }: TestSectionProps) {
                     aria-pressed={active}
                     className={`rounded-full border px-5 py-2.5 text-left text-sm font-semibold transition-all duration-300 ${
                       active
-                        ? "border-cyan-500 bg-black/30 text-white shadow-[0_0_20px_rgba(14,165,230,0.2)]"
+                        ? "border-cyan-500 bg-black/30 text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]"
                         : "border-white/10 bg-white/5 text-white/50 hover:border-white/30 hover:bg-white/10 hover:text-white"
                     }`}
                   >

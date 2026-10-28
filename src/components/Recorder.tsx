@@ -63,7 +63,7 @@ const drawWave = (canvas: HTMLCanvasElement | null, samples: Sample[]) => {
     const y = (height - barHeight) / 2;
 
     context.fillStyle =
-      amplitude > 0.55 ? "rgba(14, 165, 230, 0.9)" : "rgba(14, 165, 230, 0.45)";
+      amplitude > 0.55 ? "rgba(34, 211, 238, 0.9)" : "rgba(34, 211, 238, 0.45)";
     context.beginPath();
     context.roundRect(x, y, barWidth, barHeight, barWidth / 2);
     context.fill();
@@ -144,7 +144,7 @@ function WaveTimeline({ analysis }: { analysis: SpeechAnalysis }) {
               style={{
                 height: `${height}%`,
                 opacity: voiced ? 0.9 : 0.4,
-                boxShadow: voiced ? `0 0 12px rgba(14, 165, 230, ${0.4 + height / 200})` : "none",
+                boxShadow: voiced ? `0 0 12px rgba(34, 211, 238, ${0.4 + height / 200})` : "none",
               }}
             />
           );
@@ -619,7 +619,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
               />
               {phase === "idle" && (
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-white/10 text-cyan-400 shadow-[0_0_15px_rgba(14,165,230,0.3)]">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-white/10 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)]">
                     <Mic className="size-5" />
                   </span>
                   <p className="text-sm font-semibold text-white">
@@ -653,7 +653,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
                 </p>
                 <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-cyan-500 transition-[width] duration-100 shadow-[0_0_10px_rgba(14,165,230,0.6)]"
+                    className="h-full rounded-full bg-cyan-500 transition-[width] duration-100 shadow-[0_0_10px_rgba(34,211,238,0.6)]"
                     style={{ width: `${Math.min(100, Math.round(level * 450))}%` }}
                   />
                 </div>

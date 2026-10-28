@@ -29,6 +29,16 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const levelRef = useRef(0);
   const screenRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    gsap.from(".boli-item", {
+      y: 30,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "power3.out",
+    });
+  }, []);
+
   const release = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = null;
@@ -178,7 +188,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   return (
     <div
       ref={screenRef}
-      className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-black transition-colors duration-300"
+      className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-black transition-colors duration-300 theme-transition"
     >
       {/* Header bar with back button */}
       <header className="z-[70] w-full border-b border-white/10 bg-black/40 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
@@ -260,7 +270,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
 
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 text-xs font-bold text-white/40 bg-white/5 backdrop-blur px-4 py-2.5 rounded-full border border-white/10 shadow-lg">
           <span
-            className={`h-3 w-3 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(14,165,230,0.6)]" : "bg-white/20"}`}
+            className={`h-3 w-3 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(34,211,238,0.6)]" : "bg-white/20"}`}
           />
           {active ? "LIVE · 1.5 s chunks" : "STANDBY"}
         </div>

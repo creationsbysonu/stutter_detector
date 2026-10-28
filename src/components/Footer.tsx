@@ -2,11 +2,11 @@ import { Activity } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-black/80 backdrop-blur-md">
+    <footer className="border-t border-white/5 bg-black/40 backdrop-blur-md">
       <div className="container-page py-10 sm:py-14">
         <div className="flex flex-col gap-6 md:flex-row md:items-center justify-between">
           <a href="#overview" className="flex items-center gap-2" aria-label="Smart Boli home">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-black text-white shadow-lg shadow-black/50">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-lg shadow-cyan-500/30">
               <Activity className="size-5 text-white" strokeWidth={2} />
             </span>
             <span className="flex flex-col leading-none">
