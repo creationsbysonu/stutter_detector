@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, StopCircle, Play } from "lucide-react";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 const API_BASE =
   ((import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL ??
@@ -9,7 +10,9 @@ const CHUNK_SECONDS = 1.5;
 
 interface Prediction { label: string; fluent: boolean; confidence: number | null; }
 
-export default function SmartBoli() {
+type SmartBoliProps = { language: string };
+
+export default function SmartBoli({ language }: SmartBoliProps) {
   const [active, setActive] = useState(false);
   const [label, setLabel] = useState("READY");
   const [fluent, setFluent] = useState<boolean | null>(null);
@@ -77,6 +80,20 @@ export default function SmartBoli() {
       setFluent(data.fluent);
       setConfidence(data.confidence ?? null);
       setError("");
+
+      if (isSupabaseConfigured) {
+        try {
+          await supabase.from("sessions").insert({
+            language,
+            label: data.label,
+            fluent: data.fluent,
+            confidence: data.confidence ?? null,
+            chunk_seconds: CHUNK_SECONDS,
+          });
+        } catch {
+          // Supabase save is non-fatal; prediction already shown.
+        }
+      }
     } catch (cause) {
       setError(`Prediction failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     }

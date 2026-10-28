@@ -14,7 +14,7 @@ export default function App() {
     return (
       <div className="flex min-h-screen flex-col bg-white">
         <Header language={language} onLanguageChange={setLanguage} onStartTest={() => setShowSmartBoli(false)} />
-        <SmartBoli />
+        <SmartBoli language={language} />
         <button
           type="button"
           onClick={() => setShowSmartBoli(false)}
