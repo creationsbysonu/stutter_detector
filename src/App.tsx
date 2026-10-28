@@ -34,19 +34,7 @@ export default function App() {
         </div>
       )}>
         <div className="flex min-h-screen flex-col bg-black">
-          <Header
-            language={language}
-            onLanguageChange={setLanguage}
-            onStartTest={() => setShowSmartBoli(false)}
-          />
           <SmartBoli language={language} onBack={() => setShowSmartBoli(false)} />
-          <button
-            type="button"
-            onClick={() => setShowSmartBoli(false)}
-            className="absolute top-6 left-6 z-50 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white shadow-lg shadow-black/40 hover:bg-white/10 transition-colors"
-          >
-            ← Back
-          </button>
         </div>
       </ErrorBoundary>
     );
