@@ -6,6 +6,7 @@ const API_BASE =
   ((import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL ??
     "/api") as string;
 const PREDICT_URL = `${API_BASE.replace(/\/$/, "")}/predict`;
+const WARMUP_URL = `${API_BASE.replace(/\/$/, "")}/warmup`;
 const CHUNK_SECONDS = 1.5;
 
 interface Prediction { label: string; fluent: boolean; confidence: number | null; }
@@ -72,7 +73,10 @@ export default function SmartBoli({ language }: SmartBoliProps) {
   const sendBlob = async (blob: Blob) => {
     const form = new FormData();
     form.append("file", blob, "chunk.webm");
-    try {
+    const attempt = async (warmFirst: boolean) => {
+      if (warmFirst) {
+        try { await fetch(WARMUP_URL); } catch { /* ignore warmup failure */ }
+      }
       const res = await fetch(PREDICT_URL, { method: "POST", body: form });
       if (!res.ok) throw new Error(`Backend ${res.status}`);
       const data = (await res.json()) as Prediction;
@@ -94,8 +98,15 @@ export default function SmartBoli({ language }: SmartBoliProps) {
           // Supabase save is non-fatal; prediction already shown.
         }
       }
+    };
+    try {
+      await attempt(false);
     } catch (cause) {
-      setError(`Prediction failed: ${cause instanceof Error ? cause.message : String(cause)}`);
+      try {
+        await attempt(true);
+      } catch (cause2) {
+        setError(`Prediction failed: ${cause2 instanceof Error ? cause2.message : String(cause2)}`);
+      }
     }
   };
 
