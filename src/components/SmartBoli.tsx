@@ -1,19 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { Mic, StopCircle, Play, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mic, Play, Square } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { LottieAnimation } from "../lib/animations";
+import { useScrollLock } from "../lib/scroll";
 
-const API_BASE =
-  ((import.meta as { env?: Record<string, string | undefined> }).env?.VITE_API_BASE_URL ??
-    "") as string;
+const API_BASE = (
+  (import.meta as { env?: Record<string, string | undefined> }).env
+    ?.VITE_API_BASE_URL ?? ""
+) as string;
 const PREDICT_URL = `${API_BASE.replace(/\/$/, "")}/predict`;
 const WARMUP_URL = `${API_BASE.replace(/\/$/, "")}/warmup`;
 const CHUNK_SECONDS = 1.5;
 const BACKEND_CONFIGURED = Boolean(API_BASE);
 
-interface Prediction { label: string; fluent: boolean; confidence: number | null; }
+interface Prediction {
+  label: string;
+  fluent: boolean;
+  confidence: number | null;
+}
+
+interface LogEntry {
+  id: number;
+  at: string;
+  label: string;
+  fluent: boolean;
+  confidence: number | null;
+}
 
 type SmartBoliProps = { language: string; onBack: () => void };
+
+const settings = [
+  { label: "Chunk duration", value: `${CHUNK_SECONDS}s` },
+  { label: "Sample rate", value: "16 kHz" },
+  { label: "MFCC features", value: "13" },
+  { label: "Model", value: "Random Forest" },
+];
 
 export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const [active, setActive] = useState(false);
@@ -21,31 +43,37 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
   const [fluent, setFluent] = useState<boolean | null>(null);
   const [confidence, setConfidence] = useState<number | null>(null);
   const [error, setError] = useState("");
-  const [backendReady, setBackendReady] = useState(BACKEND_CONFIGURED);
+  const [log, setLog] = useState<LogEntry[]>([]);
 
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const rafRef = useRef<number | null>(null);
-  const levelRef = useRef(0);
+  const levelBarRef = useRef<HTMLDivElement | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
+  const logIdRef = useRef(0);
   const screenRef = useRef<HTMLDivElement | null>(null);
   const colorTweenRef = useRef<gsap.core.Tween | null>(null);
 
+  useScrollLock(true);
+
   useEffect(() => {
     gsap.from(".boli-item", {
-      y: 30,
+      y: 26,
       opacity: 0,
       duration: 0.6,
-      stagger: 0.1,
+      stagger: 0.07,
       ease: "power3.out",
     });
   }, []);
 
   useEffect(() => {
     if (!BACKEND_CONFIGURED) {
-      setBackendReady(false);
-      setError("Backend not configured. Set VITE_API_BASE_URL to your deployed API.");
+      setError(
+        "Backend not configured. Set VITE_API_BASE_URL to your deployed Smart Boli API.",
+      );
     }
   }, []);
 
@@ -54,7 +82,11 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     timerRef.current = null;
     const rec = recorderRef.current;
     if (rec && rec.state !== "inactive") {
-      try { rec.stop(); } catch { /* noop */ }
+      try {
+        rec.stop();
+      } catch {
+        /* noop */
+      }
     }
     recorderRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -62,10 +94,50 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     chunksRef.current = [];
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      void audioContextRef.current.close();
+    }
+    audioContextRef.current = null;
     if (colorTweenRef.current) {
       colorTweenRef.current.kill();
       colorTweenRef.current = null;
     }
+    if (ringRef.current) gsap.killTweensOf(ringRef.current);
+  };
+
+  /** Real mic level meter via WebAudio analyser. */
+  const startLevelMeter = (stream: MediaStream) => {
+    const AudioContextClass =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const audioContext = new AudioContextClass();
+    audioContextRef.current = audioContext;
+    if (audioContext.state === "suspended") void audioContext.resume();
+
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.6;
+    source.connect(analyser);
+
+    const buffer = new Uint8Array(analyser.fftSize);
+    const loop = () => {
+      analyser.getByteTimeDomainData(buffer);
+      let sum = 0;
+      for (let index = 0; index < buffer.length; index += 1) {
+        const value = (buffer[index] - 128) / 128;
+        sum += value * value;
+      }
+      const rms = Math.sqrt(sum / buffer.length);
+      if (levelBarRef.current) {
+        levelBarRef.current.style.width = `${Math.min(100, Math.round(rms * 480))}%`;
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
   };
 
   const startSegment = () => {
@@ -73,13 +145,14 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     const stream = streamRef.current;
     if (!stream) return;
 
-    const mime =
-      MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/mp4")
-          ? "audio/mp4"
-          : "";
-    const recorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    const mime = MediaRecorder.isTypeSupported("audio/webm")
+      ? "audio/webm"
+      : MediaRecorder.isTypeSupported("audio/mp4")
+        ? "audio/mp4"
+        : "";
+    const recorder = mime
+      ? new MediaRecorder(stream, { mimeType: mime })
+      : new MediaRecorder(stream);
     recorderRef.current = recorder;
     chunksRef.current = [];
 
@@ -89,7 +162,9 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
 
     recorder.onstop = async () => {
       if (!active) return;
-      const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+      const blob = new Blob(chunksRef.current, {
+        type: recorder.mimeType || "audio/webm",
+      });
       chunksRef.current = [];
       await sendBlob(blob);
       if (active) {
@@ -109,8 +184,26 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
       stop();
     }
 
+    /* Chunk progress ring — fills over each 1.5s window */
+    if (ringRef.current) {
+      gsap.fromTo(
+        ringRef.current,
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          duration: CHUNK_SECONDS,
+          ease: "none",
+          overwrite: true,
+        },
+      );
+    }
+
     timerRef.current = setTimeout(() => {
-      try { recorder.stop(); } catch { /* noop */ }
+      try {
+        recorder.stop();
+      } catch {
+        /* noop */
+      }
     }, CHUNK_SECONDS * 1000);
   };
 
@@ -119,7 +212,11 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     form.append("file", blob, "chunk.webm");
     const attempt = async (warmFirst: boolean) => {
       if (warmFirst) {
-        try { await fetch(WARMUP_URL); } catch { /* ignore warmup failure */ }
+        try {
+          await fetch(WARMUP_URL);
+        } catch {
+          /* ignore warmup failure */
+        }
       }
       const res = await fetch(PREDICT_URL, { method: "POST", body: form });
       if (!res.ok) throw new Error(`Backend ${res.status}`);
@@ -128,6 +225,19 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
       setFluent(data.fluent);
       setConfidence(data.confidence ?? null);
       setError("");
+
+      logIdRef.current += 1;
+      const entry: LogEntry = {
+        id: logIdRef.current,
+        at: new Date().toLocaleTimeString([], {
+          minute: "2-digit",
+          second: "2-digit",
+        }),
+        label: data.label,
+        fluent: data.fluent,
+        confidence: data.confidence ?? null,
+      };
+      setLog((previous) => [entry, ...previous].slice(0, 20));
 
       if (isSupabaseConfigured) {
         try {
@@ -145,18 +255,20 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     };
     try {
       await attempt(false);
-    } catch (cause) {
+    } catch {
       try {
         await attempt(true);
       } catch (cause2) {
-        setError(`Prediction failed: ${cause2 instanceof Error ? cause2.message : String(cause2)}`);
+        setError(
+          `Prediction failed: ${cause2 instanceof Error ? cause2.message : String(cause2)}`,
+        );
       }
     }
   };
 
   const start = async () => {
     setError("");
-    if (!backendReady) {
+    if (!BACKEND_CONFIGURED) {
       setError("Backend not configured. Please contact support.");
       return;
     }
@@ -165,6 +277,7 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       streamRef.current = stream;
+      startLevelMeter(stream);
       setActive(true);
       startSegment();
     } catch (cause) {
@@ -184,14 +297,23 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
     release();
     setLabel("READY");
     setFluent(null);
+    if (levelBarRef.current) levelBarRef.current.style.width = "0%";
   };
 
   useEffect(() => {
-    if (!backendReady || !screenRef.current || fluent === null) return;
-    const target = fluent ? "#10b981" : "#ef4444";
+    return () => {
+      release();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* Screen ambience: green pulse when fluent, red when stuttered */
+  useEffect(() => {
+    if (!screenRef.current || fluent === null) return;
+    const target = fluent ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)";
     colorTweenRef.current = gsap.to(screenRef.current, {
       backgroundColor: target,
-      duration: 0.3,
+      duration: 0.35,
       ease: "power2.inOut",
     });
     return () => {
@@ -200,129 +322,190 @@ export default function SmartBoli({ language, onBack }: SmartBoliProps) {
         colorTweenRef.current = null;
       }
     };
-  }, [fluent, backendReady]);
-
-  const levelBar = `${Math.min(100, Math.round(levelRef.current * 500))}%`;
+  }, [fluent]);
 
   return (
     <div
-      ref={screenRef}
-      className="fixed inset-0 z-[60] flex flex-col sm:flex-row bg-[color:var(--surface)] dark:bg-white transition-colors duration-300 theme-transition"
+      className="fixed inset-0 z-[90] flex flex-col bg-[color:var(--bg)]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Live stutter detection"
     >
-      <header className="z-[70] w-full border-b border-[color:var(--line)] bg-[color:var(--surface)]/60 dark:bg-black/60 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
+      <div ref={screenRef} className="absolute inset-0 transition-colors" aria-hidden="true" />
+
+      {/* Top bar */}
+      <header className="boli-item relative z-10 flex items-center justify-between border-b border-[color:var(--line)] px-5 py-4 backdrop-blur-xl sm:px-8">
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-2 rounded-lg border border-[color:var(--line)] bg-white/5 dark:bg-black/5 px-3 py-2 text-xs font-bold text-[color:var(--ink)] dark:text-white hover:bg-[color:var(--surface-2)] dark:hover:bg-black/10 transition-colors"
+          className="btn btn-ghost !px-4 !py-2 text-xs"
         >
           <ArrowLeft className="size-4" /> Back
         </button>
         <div className="flex items-center gap-3">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-white/5 dark:bg-black/5 text-[color:var(--ink)] dark:text-white">
-            <Mic className="size-4" />
+          <span className="flex size-8 items-center justify-center rounded-full border border-[color:var(--line-strong)]">
+            <Mic className="size-3.5 text-[color:var(--accent)]" />
           </span>
-          <div>
-            <span className="block text-[11px] font-bold uppercase tracking-wider text-cyan-400 dark:text-cyan-600">
-              Smart Boli
+          <div className="leading-none">
+            <span className="block text-[13px] font-extrabold tracking-tight">
+              Live detection
             </span>
-            <span className="block text-[10px] text-[color:var(--ink-muted)]/50 dark:text-white/50">
-              Live chunk detection · {language.toUpperCase()}
+            <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--ink-faint)]">
+              {language} · {CHUNK_SECONDS}s chunks
             </span>
           </div>
         </div>
-        <div className="w-16" />
+        <div className="flex items-center gap-2 rounded-full border border-[color:var(--line)] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em]">
+          <span
+            className={`size-1.5 rounded-full ${
+              active
+                ? "animate-pulse bg-[color:var(--fluent)] shadow-[0_0_10px_var(--fluent)]"
+                : "bg-[color:var(--ink-faint)]"
+            }`}
+          />
+          {active ? "Listening" : "Standby"}
+        </div>
       </header>
 
-      <aside className="w-full sm:w-80 border-r border-[color:var(--line)] bg-[color:var(--surface)]/40 dark:bg-black/40 backdrop-blur-md p-6 shrink-0">
-        <div className="mb-6 text-xs font-bold uppercase tracking-wider text-cyan-400 dark:text-cyan-600">
-          Detection settings
-        </div>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
-            <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Chunk duration</span>
-            <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">{CHUNK_SECONDS}s</span>
-          </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
-            <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Sample rate</span>
-            <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">16 kHz</span>
-          </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
-            <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">MFCC features</span>
-            <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">13</span>
-          </div>
-          <div className="flex items-center justify-between p-3 rounded-xl border border-[color:var(--line)] bg-white/5 dark:bg-black/5">
-            <span className="text-xs text-[color:var(--ink-muted)]/60 dark:text-white/60">Model</span>
-            <span className="text-xs font-mono text-[color:var(--ink)] dark:text-white">Random Forest</span>
-          </div>
-        </div>
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Left rail */}
+        <aside className="boli-item hidden w-80 shrink-0 flex-col justify-between border-r border-[color:var(--line)] p-7 lg:flex">
+          <div>
+            <p className="field-label">Detection settings</p>
+            <div className="mt-5 space-y-2.5">
+              {settings.map((setting) => (
+                <div
+                  key={setting.label}
+                  className="flex items-center justify-between rounded-xl border border-[color:var(--line)] px-4 py-3"
+                >
+                  <span className="text-xs text-[color:var(--ink-muted)]">
+                    {setting.label}
+                  </span>
+                  <span className="font-mono text-xs font-bold">{setting.value}</span>
+                </div>
+              ))}
+            </div>
 
-        <div className="mt-auto border-t border-[color:var(--line)] pt-6">
-          <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/30 dark:text-white/30 mb-3">Session log</p>
-          <div className="text-xs text-[color:var(--ink-muted)]/40 dark:text-white/40 italic">
-            Detection appears on screen
+            <p className="field-label mt-9">Session log</p>
+            <div className="mt-4 max-h-64 space-y-2 overflow-y-auto no-scrollbar">
+              {log.length === 0 && (
+                <p className="text-xs italic text-[color:var(--ink-faint)]">
+                  Chunk verdicts appear here…
+                </p>
+              )}
+              {log.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between rounded-lg border border-[color:var(--line)] bg-[color:var(--surface)] px-3.5 py-2.5 text-xs backdrop-blur-md"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span
+                      className={`size-1.5 rounded-full ${
+                        entry.fluent ? "bg-[color:var(--fluent)]" : "bg-[color:var(--stutter)]"
+                      }`}
+                    />
+                    <span className="font-bold tabular-nums text-[color:var(--ink-faint)]">
+                      {entry.at}
+                    </span>
+                  </span>
+                  <span
+                    className={`font-bold ${
+                      entry.fluent ? "text-[color:var(--fluent)]" : "text-[color:var(--stutter)]"
+                    }`}
+                  >
+                    {entry.label}
+                    {entry.confidence != null &&
+                      ` · ${(entry.confidence * 100).toFixed(0)}%`}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </aside>
 
-      <main className="flex-1 relative overflow-hidden flex items-center justify-center text-center">
-        <div className="relative z-10 px-8">
-          <div className={`inline-flex items-center justify-center rounded-full px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest mb-10 backdrop-blur-sm border ${
-            fluent === null
-              ? "border-[color:var(--ink)]/20 dark:border-white/20 bg-white/5 dark:bg-black/5 text-[color:var(--ink-muted)]/40 dark:text-white/40"
-              : fluent
-                ? "border-green-500/50 bg-green-500/20 text-green-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]"
-                : "border-red-500/50 bg-red-500/20 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.4)]"
-          }`}>
-            {fluent === null ? "IDLE" : fluent ? "FLUENT" : "STUTTERED"}
+          <button
+            type="button"
+            onClick={active ? stop : start}
+            className={`btn w-full ${active ? "bg-[color:var(--stutter)] text-white" : "btn-primary"}`}
+          >
+            {active ? <Square className="size-4 fill-current" /> : <Play className="size-4" />}
+            {active ? "Stop detection" : "Start detection"}
+          </button>
+        </aside>
+
+        {/* Stage */}
+        <main className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <div
+            className={`boli-item inline-flex items-center gap-2 rounded-full border px-5 py-2 text-[11px] font-bold uppercase tracking-mega backdrop-blur-md transition-all duration-300 ${
+              fluent === null
+                ? "border-[color:var(--line-strong)] text-[color:var(--ink-faint)]"
+                : fluent
+                  ? "border-[color:var(--fluent)]/50 bg-[color:var(--fluent)]/10 text-[color:var(--fluent)] shadow-[0_0_40px_-8px_var(--fluent)]"
+                  : "border-[color:var(--stutter)]/50 bg-[color:var(--stutter)]/10 text-[color:var(--stutter)] shadow-[0_0_40px_-8px_var(--stutter)]"
+            }`}
+          >
+            {fluent === null ? "Idle" : fluent ? "Fluent" : "Stuttered"}
           </div>
-          <div className="text-[9xl] font-black tracking-tighter text-[color:var(--ink)] dark:text-white sm:text-[11rem]">{label}</div>
+
+          <div className="boli-item mt-8 text-[clamp(4rem,16vw,10rem)] font-extrabold leading-none tracking-[-0.05em]">
+            {label}
+          </div>
+
           {confidence != null && (
-            <p className="mt-5 text-xl text-[color:var(--ink-muted)]/60 dark:text-white/60 font-medium">
-              Confidence: {(confidence * 100).toFixed(1)}%
+            <p className="boli-item mt-4 text-lg font-semibold text-[color:var(--ink-muted)]">
+              confidence {(confidence * 100).toFixed(1)}%
             </p>
           )}
-          <p className="mt-4 text-sm text-[color:var(--ink-muted)]/40 dark:text-white/40">
-            {active ? "Listening — speak now…" : "Press start to begin live detection"}
-          </p>
-        </div>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 text-xs font-bold text-[color:var(--ink-muted)]/40 dark:text-white/40 bg-white/5 dark:bg-black/5 backdrop-blur px-4 py-2.5 rounded-full border border-[color:var(--line)] shadow-lg">
-          <span
-            className={`h-3 w-3 rounded-full ${active ? "bg-cyan-500 animate-pulse shadow-[0_0_12px_rgba(34,211,238,0.6)] dark:shadow-[0_0_12px_rgba(0,0,0,0.4)]" : "bg-[color:var(--ink-muted)]/20 dark:bg-white/20"}`}
-          />
-          {active ? "LIVE · 1.5 s chunks" : "STANDBY"}
-        </div>
-
-        <div className="absolute bottom-6 left-6 right-6 h-1 overflow-hidden rounded-full bg-white/5 dark:bg-black/5">
-          <div className="h-full rounded-full bg-[color:var(--ink)] dark:bg-white transition-[width] duration-100 shadow-[0_0_10px_rgba(255,255,255,0.5)] dark:shadow-[0_0_10px_rgba(0,0,0,0.5)]" style={{ width: levelBar }} />
-        </div>
-      </main>
-
-      <div className="z-[70] w-full sm:w-80 bg-[color:var(--ink)]/5 dark:bg-white/90 backdrop-blur-md border-t border-[color:var(--line)] p-6 shrink-0">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--ink-muted)]/40 dark:text-white/40 mb-2">Control</p>
-            <button
-              type="button"
-              onClick={active ? stop : start}
-              disabled={error.length > 0 && !active}
-              className={`w-full items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-bold transition-all duration-300 ${
-                active
-                  ? "bg-red-600 dark:bg-red-700 text-white shadow-lg shadow-red-500/40 hover:bg-red-700"
-                  : "bg-white dark:bg-black text-[color:var(--ink)] dark:text-white shadow-lg shadow-white/20 dark:shadow-black/20 hover:bg-gray-200 dark:hover:bg-gray-100"
+          <div className="boli-item mt-10 w-full max-w-md">
+            <LottieAnimation
+              name="waveform"
+              className={`h-16 w-full transition-opacity duration-500 ${
+                active ? "opacity-100" : "opacity-25"
               }`}
-            >
-              {active ? <StopCircle className="size-5" /> : <Play className="size-5" />}
-              {active ? "Stop detection" : "Start detection"}
-            </button>
+              speed={active ? 1.4 : 0.5}
+            />
+            <p className="mt-3 text-xs text-[color:var(--ink-faint)]">
+              {active
+                ? "Listening — keep reading the passage aloud…"
+                : "Press start to begin live chunk detection"}
+            </p>
           </div>
-        </div>
 
-        {error && (
-          <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">
-            {error}
+          {/* Chunk progress + input level */}
+          <div className="boli-item mt-9 w-full max-w-md space-y-2.5">
+            <div className="h-1 overflow-hidden rounded-full bg-[color:var(--line)]">
+              <div
+                ref={ringRef}
+                className="h-full w-full origin-left rounded-full bg-[color:var(--accent)]"
+              />
+            </div>
+            <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[color:var(--ink-faint)]">
+              <span>Chunk window · {CHUNK_SECONDS}s</span>
+              <span>Input level</span>
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-[color:var(--line)]">
+              <div
+                ref={levelBarRef}
+                className="h-full w-0 rounded-full bg-[color:var(--ink)] transition-[width] duration-100"
+              />
+            </div>
           </div>
-        )}
+
+          {error && (
+            <div className="boli-item mt-8 max-w-md rounded-2xl border border-[color:var(--stutter)]/30 bg-[color:var(--stutter)]/10 px-5 py-4 text-sm text-[color:var(--stutter)]">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={active ? stop : start}
+            className={`boli-item btn mt-8 lg:hidden ${active ? "bg-[color:var(--stutter)] text-white" : "btn-primary"}`}
+          >
+            {active ? <Square className="size-4 fill-current" /> : <Play className="size-4" />}
+            {active ? "Stop detection" : "Start detection"}
+          </button>
+        </main>
       </div>
     </div>
   );

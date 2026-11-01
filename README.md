@@ -1,6 +1,14 @@
 # Smart Boli — Multilingual Stutter Detection
 
-A premium, minimalist speech-fluency practice tool that detects stuttering in real time. Supports **Nepali, Hindi, and English** passages with live chunk-based analysis — the screen flashes **green (fluent)** or **red (stuttered)** as you speak.
+A premium, minimalist speech-fluency practice tool that detects stuttering in real time. **Nepali-first** (the stutter model is trained on Nepali speech), with Hindi and English passages also available. Live chunk-based analysis flashes **green (fluent)** or **red (stuttered)** as you speak.
+
+## ✨ Frontend
+
+An Apple-style, scroll-driven marketing site + testing interface:
+
+- **Lenis** — locomotive-style inertial smooth scrolling, synced to GSAP ScrollTrigger
+- **GSAP ScrollTrigger** — masked word reveals, parallax, pinned horizontal “How it works”, scrubbed scale-on-scroll panels, count-up stats
+- **Lottie** — self-hosted, hand-crafted animations (mic, waveform, loader, check, scroll cue) with dark-mode variants
 
 ## 🚀 Live Demo
 
@@ -11,7 +19,7 @@ A premium, minimalist speech-fluency practice tool that detects stuttering in re
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| **Frontend** | React + Vite + TypeScript + Tailwind CSS | Premium B&W UI, GSAP animations, on-device recorder |
+| **Frontend** | React + Vite + TypeScript + Tailwind + GSAP + Lenis + Lottie | Premium minimalist UI, scroll-driven animations, on-device recorder |
 | **Backend** | FastAPI + Python | ML inference (Random Forest, 13 MFCC features) |
 | **Database** | Supabase (PostgreSQL) | Session history, fluent/stutter logging |
 | **Deployment** | Vercel (frontend) + Render (backend) | Production hosting |
@@ -19,13 +27,14 @@ A premium, minimalist speech-fluency practice tool that detects stuttering in re
 ## 📁 Project Structure
 
 ```
-stutter-detector/          # Frontend (Vercel)
+smart-boli-frontend/       # Frontend (Vercel)
 ├── src/
-│   ├── components/        # React components
-│   ├── data/              # Passages (EN/HI/NE)
-│   ├── lib/               # Analysis engine, Supabase client
+│   ├── components/        # React components (sections, recorder, live detection)
+│   ├── assets/lottie/     # Self-hosted Lottie animations
+│   ├── data/              # Passages (NE/EN/HI)
+│   ├── lib/               # Analysis engine, Supabase client, scroll + animation helpers
 │   ├── App.tsx            # Root component
-│   └── index.css          # Premium glassmorphism styles
+│   └── index.css          # Design system (tokens, glass, grain)
 ├── vercel.json            # Vercel config
 └── package.json
 
@@ -50,7 +59,7 @@ smart-boli-backend/        # Backend (Render)
 ### Frontend
 
 ```bash
-cd stutter-detector
+cd smart-boli-frontend
 cp .env.example .env
 # Edit .env with your Supabase and API URLs
 npm install
@@ -81,11 +90,11 @@ docker run -p 8000:8000 -e PORT=8000 smart-boli-backend
 
 ## 🌍 Supported Languages
 
-| Language | Code | Native Name |
-|----------|------|-------------|
-| English | `english` | English |
-| Hindi | `hindi` | हिन्दी |
-| Nepali | `nepali` | नेपाली |
+| Language | Code | Native Name | Model |
+|----------|------|-------------|-------|
+| Nepali (primary) | `nepali` | नेपाली | ✅ Trained stutter model |
+| English | `english` | English | 🔨 Dedicated model in development (browser analysis now) |
+| Hindi | `hindi` | हिन्दी | Browser-based rhythm analysis |
 
 ## 📄 License
 

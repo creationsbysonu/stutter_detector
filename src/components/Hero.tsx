@@ -1,135 +1,222 @@
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/all";
-import { useEffect } from "react";
-import { Mic, Play } from "lucide-react";
-import { LottieAnimation, LOTTIE_MIC } from "../lib/animations";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowDown, Mic, Sparkles } from "lucide-react";
+import { LottieAnimation, maskedWords } from "../lib/animations";
+import { prefersReducedMotion, useScroll } from "../lib/scroll";
+import { useTheme } from "../context/ThemeContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
 type HeroProps = {
-  onStartTest: () => void;
   onLiveDetection: () => void;
 };
 
-export default function Hero({ onStartTest, onLiveDetection }: HeroProps) {
+const headline = "Find your fluent voice.";
+
+const bullets = [
+  { ne: "नेपालीमा प्रशिक्षण", en: "Nepali-first model" },
+  { ne: "अडियो तपाईंकै डिभाइसमा", en: "Audio stays on device" },
+  { ne: "तुरुन्त नतिजा", en: "Instant fluency score" },
+];
+
+export default function Hero({ onLiveDetection }: HeroProps) {
+  const rootRef = useRef<HTMLElement | null>(null);
+  const { scrollTo } = useScroll();
+  const { theme } = useTheme();
+
   useEffect(() => {
-    const tl = gsap.timeline();
+    const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) {
+        gsap.set("[data-hero]", { opacity: 1, y: 0, scale: 1 });
+        return;
+      }
 
-    tl.from(".hero-badge", {
-      y: 30,
-      opacity: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    })
-      .from(
-        ".hero-title",
-        { y: 40, opacity: 0, duration: 0.8, ease: "power3.out" },
-        "-=0.4"
-      )
-      .from(
-        ".hero-desc",
-        { y: 30, opacity: 0, duration: 0.7, ease: "power3.out" },
-        "-=0.4"
-      )
-      .from(
-        ".hero-actions > *",
-        { y: 30, opacity: 0, duration: 0.6, stagger: 0.15, ease: "power3.out" },
-        "-=0.3"
-      )
-      .from(
-        ".hero-features > *",
-        { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: "power2.out" },
-        "-=0.4"
-      );
+      const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
 
-    gsap.to(".wave-path", {
-      scrollTrigger: {
-        trigger: "#overview",
-        start: "top center",
-        end: "bottom center",
-        scrub: true,
-      },
-      attr: { d: "M0 80 Q 200 40 400 80 T 800 80" },
-      duration: 1,
-      ease: "none",
-    });
+      tl.fromTo(
+        ".hero-eyebrow",
+        { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9 },
+      )
+        .fromTo(
+          ".hero-word",
+          { yPercent: 118 },
+          { yPercent: 0, duration: 1.25, stagger: 0.07 },
+          0.15,
+        )
+        .fromTo(
+          "[data-hero='sub']",
+          { y: 28, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1 },
+          0.55,
+        )
+        .fromTo(
+          "[data-hero='cta']",
+          { y: 24, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.9, stagger: 0.1 },
+          0.7,
+        )
+        .fromTo(
+          ".hero-bullet",
+          { y: 18, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, stagger: 0.09 },
+          0.9,
+        )
+        .fromTo(
+          ".hero-visual",
+          { opacity: 0, scale: 0.92, y: 30 },
+          { opacity: 1, scale: 1, y: 0, duration: 1.4 },
+          0.4,
+        );
+
+      /* Locomotive-style parallax: the orb drifts slower than the page */
+      gsap.to(".hero-orb", {
+        yPercent: 22,
+        ease: "none",
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+      gsap.to(".hero-waveform", {
+        yPercent: -35,
+        ease: "none",
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+      gsap.to(".hero-copy", {
+        yPercent: -12,
+        opacity: 0.25,
+        ease: "none",
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: "top top",
+          end: "bottom 30%",
+          scrub: true,
+        },
+      });
+    }, rootRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <section id="overview" className="relative pt-24 sm:pt-32 lg:pt-40 pb-16 overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <svg className="absolute top-0 left-0 w-full h-[400px] text-[color:var(--ink)]/5 dark:text-white/5" preserveAspectRatio="none">
-          <path className="wave-path" d="M0 80 Q 200 120 400 80 T 800 80" fill="none" stroke="currentColor" strokeWidth="2" />
-        </svg>
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-cyan-500/10 dark:bg-cyan-500/5 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-[120px]" />
+    <section
+      ref={rootRef}
+      id="overview"
+      className="relative overflow-hidden pb-24 pt-36 sm:pb-32 sm:pt-44 lg:pt-48"
+    >
+      {/* Ambient glows */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-52 left-1/2 h-[560px] w-[860px] -translate-x-1/2 rounded-full bg-[color:var(--accent)]/[0.07] blur-[130px]" />
+        <div className="absolute bottom-0 right-[-10%] h-[420px] w-[420px] rounded-full bg-[color:var(--accent)]/[0.05] blur-[120px]" />
       </div>
 
-      <div className="container-page relative z-10">
-        <div className="max-w-2xl">
-          <span className="hero-badge inline-flex items-center gap-2 rounded-full border border-[color:var(--line)] bg-white/50 dark:bg-black/5 px-3 py-1 text-xs font-bold uppercase tracking-widest text-cyan-400 dark:text-cyan-400">
-            <Mic className="size-3" /> Speak naturally
+      <div className="container-page relative z-10 grid items-center gap-16 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+        <div className="hero-copy">
+          <span className="hero-eyebrow eyebrow inline-flex items-center gap-2.5 rounded-full border border-[color:var(--line)] bg-[color:var(--surface)] px-4 py-2 backdrop-blur-md">
+            <Sparkles className="size-3.5 text-[color:var(--accent)]" />
+            <span className="font-deva">स्मार्ट बोली</span>
+            <span className="text-[color:var(--line-strong)]">/</span>
+            Nepali-first speech lab
           </span>
-          <h1 className="hero-title mt-6 text-balance text-5xl font-black leading-[1.02] tracking-tight text-[color:var(--ink)] dark:text-white sm:text-6xl lg:text-[4.5rem]">
-            Hear your{" "}
-            <span className="relative inline-block text-cyan-400 dark:text-cyan-400">
-              fluency
-              <span className="absolute inset-x-0 bottom-[8%] z-0 h-[10%] rounded-full bg-cyan-500/30 dark:bg-cyan-500/20 blur-md" />
-            </span>{" "}
-            in your own voice.
+
+          <h1 className="display mt-8 text-[clamp(3rem,8.5vw,6.4rem)] leading-[0.98]">
+            {maskedWords(headline, "hero-word")}
           </h1>
-          <p className="hero-desc mt-8 max-w-lg text-lg leading-relaxed text-[color:var(--ink-muted)] dark:text-white/70">
-            Read a short passage aloud and get instant feedback on pace, pauses, and
-            rhythm. Audio stays on your device — nothing is uploaded.
+
+          <p
+            data-hero="sub"
+            className="mt-8 max-w-xl text-lg leading-relaxed text-[color:var(--ink-muted)]"
+          >
+            Read a short passage in नेपाली, हिन्दी or English and speak into your
+            microphone. Smart Boli listens in{" "}
+            <strong className="font-bold text-[color:var(--ink)]">1.5-second chunks</strong>,
+            flags stuttered moments as they happen, and turns each session into a
+            fluency score you can actually practice against.
           </p>
-          <div className="hero-actions mt-12 flex flex-col gap-4 sm:flex-row sm:items-center">
+
+          <div className="mt-11 flex flex-col gap-3.5 sm:flex-row sm:items-center">
             <button
               type="button"
-              onClick={onStartTest}
-              className="flex items-center justify-center gap-2 rounded-full bg-[color:var(--ink)] dark:bg-white text-[color:var(--surface)] dark:text-black px-8 py-4 text-base font-bold shadow-[0_0_30px_rgba(0,0,0,0.6)] dark:shadow-[0_0_30px_rgba(0,0,0,0.2)] hover:bg-gray-900 dark:hover:bg-gray-100 hover:shadow-[0_0_40px_rgba(34,211,238,0.4)] transition-all duration-300 active:scale-[0.97] group"
+              onClick={() => scrollTo("#test", { offset: -80 })}
+              data-hero="cta"
+              className="btn btn-primary group"
             >
-              <Play className="size-5 group-hover:translate-x-1 transition-transform" /> Start test
+              Take the fluency test
+              <ArrowDown className="size-4 transition-transform duration-300 group-hover:translate-y-0.5" />
             </button>
             <button
               type="button"
               onClick={onLiveDetection}
-              className="flex items-center justify-center gap-2 rounded-full border border-[color:var(--line)] bg-white/5 dark:bg-black/5 px-8 py-4 text-base font-semibold text-[color:var(--ink)]/90 dark:text-white/90 hover:bg-[color:var(--surface)]/80 dark:hover:bg-black/10 hover:border-cyan-500/30 hover:text-[color:var(--ink)] dark:hover:text-white transition-all duration-300 active:scale-[0.97]"
+              data-hero="cta"
+              className="btn btn-ghost"
             >
-              <Mic className="size-5" /> Live chunk detection
+              <Mic className="size-4" /> Live chunk detection
             </button>
           </div>
-          <div className="hero-features mt-14 flex flex-wrap items-center gap-6 text-sm text-[color:var(--ink-muted)] dark:text-white/50">
-            <span className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)] dark:shadow-[0_0_10px_rgba(0,0,0,0.3)]" />
-              No account needed
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)] dark:shadow-[0_0_10px_rgba(0,0,0,0.3)]" />
-              On-device audio
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.6)] dark:shadow-[0_0_10px_rgba(0,0,0,0.3)]" />
-              Nepali · Hindi · English
-            </span>
-          </div>
 
-          <div className="mt-16 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 dark:from-cyan-500/10 dark:to-blue-600/10 rounded-[3rem] blur-xl" />
-            <div className="relative rounded-[3rem] border border-[color:var(--line)] bg-white/5 dark:bg-black/5 p-8 backdrop-blur-md shadow-[0_0_50px_rgba(34,211,238,0.15)] dark:shadow-[0_0_50px_rgba(0,0,0,0.1)]">
-              <LottieAnimation
-                src={LOTTIE_MIC}
-                className="w-48 h-48 mx-auto mb-6 opacity-80 animate-pulse-slow"
-                speed={0.8}
-              />
-              <h3 className="text-2xl font-black text-[color:var(--ink)] dark:text-white text-center mb-3">Your voice, analyzed instantly</h3>
-              <p className="text-center text-[color:var(--ink-muted)]/60 dark:text-white/60 max-w-md mx-auto">
-                Speak into your microphone and get real-time fluency feedback with
-                smooth, premium animations.
-              </p>
+          <ul className="mt-12 flex flex-wrap gap-x-8 gap-y-3">
+            {bullets.map((bullet) => (
+              <li key={bullet.en} className="hero-bullet flex items-center gap-2.5">
+                <span className="size-1.5 rounded-full bg-[color:var(--accent)] shadow-[0_0_10px_var(--accent)]" />
+                <span className="font-deva text-sm text-[color:var(--ink-2)]">
+                  {bullet.ne}
+                </span>
+                <span className="text-sm text-[color:var(--ink-faint)]">
+                  {bullet.en}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="hero-visual relative mx-auto w-full max-w-md" data-hero="visual">
+          <div className="hero-orb relative flex aspect-square items-center justify-center">
+            <div className="absolute inset-[12%] rounded-full border border-[color:var(--line)]" aria-hidden="true" />
+            <div className="absolute inset-[24%] rounded-full border border-[color:var(--line)]" aria-hidden="true" />
+            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_45%,var(--accent-soft),transparent_65%)]" aria-hidden="true" />
+            <LottieAnimation
+              name={theme === "dark" ? "micDark" : "mic"}
+              className="relative z-10 w-[58%] animate-floaty"
+              speed={0.9}
+            />
+          </div>
+          <div className="hero-waveform card mx-auto -mt-6 w-[86%] px-6 py-5">
+            <div className="flex items-center justify-between">
+              <span className="field-label">Live waveform</span>
+              <span className="inline-flex items-center gap-2 text-[11px] font-bold text-[color:var(--fluent)]">
+                <span className="size-1.5 animate-pulse rounded-full bg-[color:var(--fluent)]" />
+                16 kHz · on-device
+              </span>
             </div>
+            <LottieAnimation
+              name="waveform"
+              className="mt-3 h-14 w-full"
+              speed={1.1}
+            />
           </div>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => scrollTo("#how", { offset: 0 })}
+        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-[color:var(--ink-faint)] transition-colors hover:text-[color:var(--ink)] lg:flex"
+        aria-label="Scroll to how it works"
+      >
+        <LottieAnimation
+          name={theme === "dark" ? "scrollCueDark" : "scrollCue"}
+          className="h-14 w-9"
+        />
+      </button>
     </section>
   );
 }

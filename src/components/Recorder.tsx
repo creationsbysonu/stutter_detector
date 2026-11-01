@@ -88,7 +88,7 @@ function ScoreRing({ score, tone }: { score: number; tone: SpeechAnalysis["tone"
   return (
     <div className="relative size-32 shrink-0">
       <svg viewBox="0 0 110 110" className="size-full -rotate-90" aria-hidden="true">
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="white/10 dark:stroke-black/10" strokeWidth="8" />
+        <circle cx="55" cy="55" r={radius} fill="none" stroke="var(--line)" strokeWidth="8" />
         <circle
           cx="55"
           cy="55"
@@ -456,7 +456,7 @@ export default function Recorder({ passage }: { passage: Passage }) {
     : "—";
 
   return (
-    <div className="card overflow-hidden">
+    <div className="card flex flex-col overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[color:var(--line)] px-6 py-4 sm:px-8">
         <div className="flex items-center gap-2.5">
           <span className="flex size-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400 dark:text-cyan-600">
